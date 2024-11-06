@@ -14,4 +14,7 @@ abstract class Event {
   getStartTime(): Date {
     return this.startTime;
   }
+  getEndTime(): Date {
+    return this.endTime;
+  }
 }

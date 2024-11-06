@@ -11,6 +11,10 @@ abstract class Event {
 
   abstract getDetails(): string;
 
+  getID(): string {
+    return this.id;
+  }
+  
   getStartTime(): Date {
     return this.startTime;
   }

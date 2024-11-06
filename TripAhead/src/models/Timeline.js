@@ -10,6 +10,10 @@ class Timeline {
     this.events.sort((a, b) => a.getStartTime().getTime() - b.getStartTime().getTime());
   }
 
+  removeEvent(event: Event): void {
+    //ToDo
+  }
+
   getEvents(): Event[] {
     return this.events;
   }

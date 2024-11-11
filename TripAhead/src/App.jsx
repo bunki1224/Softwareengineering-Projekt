@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Button, Typography } from "@mui/material";
+import Activity from "./components/Activity";
+import CustomRating from "./components/CustomRating";
+
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	<>
+<Typography variant="h1">
+TripAhead
+</Typography>
+
+<Button variant="contained">New Activity +</Button>
+
+<Activity
+  title="Tokyo Skytree"
+  address="1 Chome-1-2 Oshiage, Sumida City, Tokyo"
+  price={20}
+  tags={['Sightseeing']}
+  rating={5}
+  image="./bilder/Skytree.png"
+/>
+
+<Activity
+  title="Meiji-Shrine"
+  address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
+  price={0}
+  tags={['Free', 'Temple', 'test']}
+  rating={4.5}
+  image="./bilder/Meiji.jpg"
+/>
+
+
+
+  </>
+)
 }
 
-export default App
+export default App;
+
+

@@ -7,7 +7,7 @@ function CustomRating({ value, onChange }) {
   	<Rating
     	name="custom-controlled"
     	value={value}
-    	onChange={(event, newValue) => onChange(newValue)} // Ruft die übergebene onChange-Funktion auf
+    	onChange={(event, newValue) => onChange(newValue)}
   	/>
 	</div>
   );

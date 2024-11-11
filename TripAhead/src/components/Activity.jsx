@@ -51,16 +51,13 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
     	<Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
       	<PriceBadge label={`${price} €`} />
 
-      	{/* Render each tag as a Chip */}
       	{tags.map((tag) => (
         	<TagChip key={tag} label={tag} />
       	))}
+		{/* Rating */}
+		<Rating value={rating} readOnly size="small" />
     	</Box>
 
-    	{/* Rating */}
-    	<Box sx={{ mt: 1 }}>
-      	<Rating value={rating} readOnly size="small" />
-    	</Box>
   	</CardContent>
 
   	{/* Thumbnail */}

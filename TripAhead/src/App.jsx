@@ -87,6 +87,7 @@ function App() {
       </h1>
       <TextField
         label="suche Orte / Hotels"
+        style={{margin: "10px"}}
         sx={{
           width: '100%',
           backgroundColor: 'white',
@@ -99,15 +100,25 @@ function App() {
           },
         }}
       ></TextField>
-        <Activity
+      
+      <Activity
         title="Meiji-Shrine"
         address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
         price={0}
-        tags={['Free', 'Temple', 'test']}
-        rating={4.5}
+        tags={['Shrine']}
+        rating={4}
         image="./bilder/Meiji.jpg"
       /> 
-      
+      <Activity
+        title="Asakusa Shrine"
+        address="2-chōme-3-1 Asakusa, Taito City, Tokyo"
+        price={0}
+        tags={['Shrine']}
+        rating={3}
+        image="./bilder/Asakusa.jpg"
+      />
+
+
     </div>
     
     <div
@@ -138,38 +149,42 @@ function App() {
         Timeline
       </h1>
       <Activity
-      style={{ width: '100%' }}
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
-        price={0}
-        tags={['Free', 'Temple', 'test']}
+        title="Ichiran Ramen"
+        address="Shinjuku City, Shinjuku, 3 Chome−34−11, Peace Bldg., B1F"
+        price={"10"}
+        tags={['Restaurant']}
         rating={4.5}
-        image="./bilder/Meiji.jpg"
+        image="./bilder/Ichiran.jpg"
       />
+
       <Activity
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
+        title="Rainbow Bridge"
+        address="Minato City, Tokyo 105-0000, Japan"
         price={0}
-        tags={['Free', 'Temple', 'test']}
-        rating={4.5}
-        image="./bilder/Meiji.jpg"
+        tags={['Sightseeing']}
+        rating={5}
+        image="./bilder/rainbow-bridge.jpg"
       />
+
       <Activity
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
+        title="Shibuya Crossing"
+        address="Shibuya, Präfektur Tokio, Japan"
         price={0}
-        tags={['Free', 'Temple', 'test']}
-        rating={4.5}
-        image="./bilder/Meiji.jpg"
+        tags={['Sightseeing']}
+        rating={3}
+        image="./bilder/Shibuya-crossing.jpg"
       />
+
       <Activity
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
+        title="Tokyo Metropolitan Government Building"
+        address="2-chōme-8-1 Nishishinjuku, Shinjuku City"
         price={0}
-        tags={['Free', 'Temple', 'test']}
-        rating={4.5}
-        image="./bilder/Meiji.jpg"
+        tags={['Lookout']}
+        rating={4}
+        image="./bilder/Metropolitan.jpg"
       />
+      
+      
       {/* Weitere Inhalte hier */}
     </div>
   </div>

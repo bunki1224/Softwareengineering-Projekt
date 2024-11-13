@@ -8,6 +8,7 @@ function App() {
 
   return (
     <>
+    
       {/* <Typography variant="h1">
       TripAhead
       </Typography>
@@ -37,7 +38,7 @@ function App() {
   style={{
     width: '95vw',
     height: '80vh',
-    backgroundColor: '#008888',
+    backgroundColor: '#213243',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -60,7 +61,7 @@ function App() {
     <div
       id="backlog"
       style={{
-        backgroundColor: '#424549',
+        backgroundColor: '#424b64',
         width: '45%',
         height: '80%',
         display: 'flex',
@@ -112,7 +113,7 @@ function App() {
     <div
       id="timeline"
       style={{
-        backgroundColor: '#424549',
+        backgroundColor: '#424b64',
         width: '45%',
         height: '80%',
         display: 'flex',

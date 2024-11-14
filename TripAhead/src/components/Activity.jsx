@@ -1,6 +1,7 @@
 import React from 'react';
-import { Card, CardContent, Typography, Chip, Box, Rating } from '@mui/material';
+import { Card, CardContent, Typography, Chip, Box, Rating, Button } from '@mui/material';
 import { styled } from '@mui/system';
+import EditIcon from '@mui/icons-material/Edit';
 
 const ActivityCard = styled(Card)(({ theme }) => ({
   display: 'flex',
@@ -36,7 +37,20 @@ const TagChip = styled(Chip)({
   marginRight: '5px',
 });
 
+const editButton = styled(Button)({
+  marginLeft: '10px',
+  marginRight: '5px',
+});
+
+
 const Activity = ({ title, address, price, tags, rating, image }) => {
+
+  {/* Edit Activity-Function */}
+function editActivity(){
+  
+}
+
+
   return (
 	<ActivityCard>
   	<CardContent sx={{ flex: 1 }}>
@@ -59,6 +73,9 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
       	))}
 		{/* Rating */}
 		<Rating value={rating} readOnly size="small" />
+
+    {/* Edit Button */}
+    <Button variant='contained' startIcon={<EditIcon />} >edit</Button>
     	</Box>
 
   	</CardContent>
@@ -69,6 +86,5 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
   );
 };
 
+
 export default Activity;
-
-

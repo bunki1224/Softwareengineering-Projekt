@@ -10,6 +10,9 @@ const ActivityCard = styled(Card)(({ theme }) => ({
   margin: theme.spacing(1),
   borderRadius: theme.spacing(2),
   boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+  minHeight: 120, // Feste Mindesthöhe
+  flexShrink: 0,
+  width: "95%",
 }));
 
 const Thumbnail = styled('img')({

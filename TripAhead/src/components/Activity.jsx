@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Chip, Box, Rating, Button } from '@mui/material';
+import { Card, CardContent, Typography, Chip, Box, Rating, Button, Modal } from '@mui/material';
 import { styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -37,18 +37,25 @@ const TagChip = styled(Chip)({
   marginRight: '5px',
 });
 
-const editButton = styled(Button)({
-  marginLeft: '10px',
-  marginRight: '5px',
-});
+const ModalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 
 const Activity = ({ title, address, price, tags, rating, image }) => {
 
-  {/* Edit Activity-Function */}
-function editActivity(){
-  
-}
+  {/* Modal*/}
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
 
   return (
@@ -74,8 +81,25 @@ function editActivity(){
 		{/* Rating */}
 		<Rating value={rating} readOnly size="small" />
 
-    {/* Edit Button */}
-    <Button variant='contained' startIcon={<EditIcon />} >edit</Button>
+    {/* Edit Button and Edit Modal*/}
+    <div>
+      <Button variant='contained' startIcon={<EditIcon />} onClick={handleOpen} >edit</Button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={ModalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            //ToDo:
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            editable values...
+          </Typography>
+        </Box>
+      </Modal>
+    </div>
     	</Box>
 
   	</CardContent>

@@ -2,36 +2,62 @@ import { Button, Typography } from "@mui/material";
 import Activity from "./components/Activity";
 import CustomRating from "./components/CustomRating";
 import TextField from "@mui/material/TextField";
-
+import ReactDOM from "react-dom/client";
+import { useEffect, useState } from "react";
 
 function App() {
 
+  const [activities, setActivities] = useState({ backlog: [], timeline: [] });
+
+  useEffect(() => {
+    fetch('/src/data/activities.json')
+      .then(response => response.json())
+      .then(data => setActivities(data));
+  }, []);
+
+
+  /**
+  * @param {string}   category add Item to backlog or timeline div
+  * @param {object}   item Item to create an Activity
+  */
+  function insertActivity(category, item) {
+    // Überprüfen, ob die Kategorie existiert
+    if (!activities[category]) {
+      console.error(`Kategorie "${category}" existiert nicht.`);
+      return;
+    }
+
+    // Zustand aktualisieren
+    setActivities((prevActivities) => ({
+      ...prevActivities,
+      [category]: [item, ...prevActivities[category]], // Neues Objekt hinzufügen
+    }));
+  }
+  window.insertActivity = insertActivity;
+  
+  function printActivites(){
+    console.log(activities)
+  }
+  window.printActivites = printActivites;
+
+  function deleteActivity(category, id) {
+    // Überprüfen, ob die Kategorie existiert
+    if (!activities[category]) {
+      console.error(`Kategorie "${category}" existiert nicht.`);
+      return;
+    }
+
+    // Zustand aktualisieren
+    setActivities((prevActivities) => ({
+      ...prevActivities,
+      [category]: prevActivities[category].filter((activity) => activity.id !== id),
+    }));
+  }
+  window.deleteActivity = deleteActivity;
   return (
     <>
     
-      {/* <Typography variant="h1">
-      TripAhead
-      </Typography>
-
-      <Button variant="contained">New Activity +</Button>
-
-      <Activity
-        title="Tokyo Skytree"
-        address="1 Chome-1-2 Oshiage, Sumida City, Tokyo"
-        price={20}
-        tags={['Sightseeing']}
-        rating={5}
-        image="./bilder/Skytree.png"
-      />
-
-      <Activity
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
-        price={0}
-        tags={['Free', 'Temple', 'test']}
-        rating={4.5}
-        image="./bilder/Meiji.jpg"
-      /> */}
+      
 
 <div
   id="wrapper"
@@ -101,22 +127,17 @@ function App() {
         }}
       ></TextField>
       
-      <Activity
-        title="Meiji-Shrine"
-        address="1-1 Yoyogikamizonochō, Shibuya City, Tokyo"
-        price={0}
-        tags={['Shrine']}
-        rating={4}
-        image="./bilder/Meiji.jpg"
-      /> 
-      <Activity
-        title="Asakusa Shrine"
-        address="2-chōme-3-1 Asakusa, Taito City, Tokyo"
-        price={0}
-        tags={['Shrine']}
-        rating={3}
-        image="./bilder/Asakusa.jpg"
-      />
+      {activities.backlog.map((activity, index) => (
+          <Activity
+            key={index}
+            title={activity.title}
+            address={activity.address}
+            price={activity.price}
+            tags={activity.tags}
+            rating={activity.rating}
+            image={activity.image}
+          />
+        ))}
 
 
     </div>
@@ -148,44 +169,19 @@ function App() {
       >
         Timeline
       </h1>
-      <Activity
-        title="Ichiran Ramen"
-        address="Shinjuku City, Shinjuku, 3 Chome−34−11, Peace Bldg., B1F"
-        price={"10"}
-        tags={['Restaurant']}
-        rating={4.5}
-        image="./bilder/Ichiran.jpg"
-      />
-
-      <Activity
-        title="Rainbow Bridge"
-        address="Minato City, Tokyo 105-0000, Japan"
-        price={0}
-        tags={['Sightseeing']}
-        rating={5}
-        image="./bilder/rainbow-bridge.jpg"
-      />
-
-      <Activity
-        title="Shibuya Crossing"
-        address="Shibuya, Präfektur Tokio, Japan"
-        price={0}
-        tags={['Sightseeing']}
-        rating={3}
-        image="./bilder/Shibuya-crossing.jpg"
-      />
-
-      <Activity
-        title="Tokyo Metropolitan Government Building"
-        address="2-chōme-8-1 Nishishinjuku, Shinjuku City"
-        price={0}
-        tags={['Lookout']}
-        rating={4}
-        image="./bilder/Metropolitan.jpg"
-      />
-      
-      
+            
       {/* Weitere Inhalte hier */}
+      {activities.timeline.map((activity, index) => (
+          <Activity
+            key={index}
+            title={activity.title}
+            address={activity.address}
+            price={activity.price}
+            tags={activity.tags}
+            rating={activity.rating}
+            image={activity.image}
+          />
+        ))}
     </div>
   </div>
 </div>

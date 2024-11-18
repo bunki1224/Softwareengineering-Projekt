@@ -17,6 +17,8 @@ const MapsSearchbar = ({ insertActivity }) => {
       const name = place.name || "Unbekannter Ort";
       const address = place.formatted_address || "Adresse nicht verfügbar";
       const location = place.geometry?.location || "Keine Koordinaten verfügbar";
+      
+      const rating = place.rating || "Keine Bewertung verfügbar";
 
       const coordinates = location
         ? {
@@ -29,6 +31,7 @@ const MapsSearchbar = ({ insertActivity }) => {
         name,
         address,
         coordinates,
+        rating,
       });
 
       // Beispielwerte für die anderen Felder
@@ -38,7 +41,7 @@ const MapsSearchbar = ({ insertActivity }) => {
         address: address,
         price: 0, // Standardwert
         tags: ["Sightseeing"], // Standard-Tag
-        rating: 5, // Standard-Bewertung
+        rating: Math.round(rating), // Standard-Bewertung
         image: "./bilder/default.jpg", // Beispielbild
       };
 

@@ -43,7 +43,7 @@ function App() {
   function printActivites(){
     console.log(activities)
   }
-
+// Test
   function updateJson(){
     useEffect(() => {
       // Wenn sich der Zustand `activities` ändert, speichere ihn im lokalen Speicher

@@ -4,9 +4,13 @@ import CustomRating from "./components/CustomRating";
 import TextField from "@mui/material/TextField";
 import ReactDOM from "react-dom/client";
 import { useEffect, useState } from "react";
+import MapsSearchbar from "./components/mapsSearchbar";
+import { LoadScript } from "@react-google-maps/api";
 
 function App() {
 
+  const googleMapsApiKey = import.meta.env.VITE_Map_Api_Key;
+  console.log(googleMapsApiKey);
   const [activities, setActivities] = useState({ backlog: [], timeline: [] });
 
   useEffect(() => {
@@ -111,22 +115,15 @@ function App() {
       >
         Backlog
       </h1>
-      <TextField
-        label="suche Orte / Hotels"
-        style={{margin: "10px"}}
-        sx={{
-          width: '100%',
-          backgroundColor: 'white',
-          borderRadius: '20px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '20px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderRadius: '20px',
-          },
-        }}
-      ></TextField>
+      <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+      <div style={{ margin: "10px" , width:"100%"}}>
+        <MapsSearchbar insertActivity={insertActivity} />
+      </div>
+      </LoadScript>
+
+
       
+
       {activities.backlog.map((activity, index) => (
           <Activity
             key={index}

@@ -1,20 +1,25 @@
 import { Button, Typography } from "@mui/material";
 import Activity from "./components/Activity";
 import CustomRating from "./components/CustomRating";
-import TextField from "@mui/material/TextField";
 import ReactDOM from "react-dom/client";
 import { useEffect, useState } from "react";
+import MapsSearchbar from "./components/mapsSearchbar";
+import { LoadScript } from "@react-google-maps/api";
+
 
 function App() {
 
-  const [activities, setActivities] = useState({ backlog: [], timeline: [] });
+  const googleMapsApiKey = import.meta.env.VITE_Map_Api_Key;
+  const initialActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
+  
+  const [activities, setActivities] = useState(initialActivities);
 
   useEffect(() => {
-    fetch('/src/data/activities.json')
-      .then(response => response.json())
-      .then(data => setActivities(data));
-  }, []);
+    // Speichern der Aktivitäten im lokalen Speicher, wenn sie sich ändern
+    localStorage.setItem('activities', JSON.stringify(activities));
+  }, [activities]);
 
+  console.log(localStorage.getItem('activities'));
 
   /**
   * @param {string}   category add Item to backlog or timeline div
@@ -38,8 +43,19 @@ function App() {
   function printActivites(){
     console.log(activities)
   }
-  window.printActivites = printActivites;
+// Test
+  function updateJson(){
+    useEffect(() => {
+      // Wenn sich der Zustand `activities` ändert, speichere ihn im lokalen Speicher
+      localStorage.setItem('activities', JSON.stringify(activities));
+    }, [activities]);
 
+  }
+  window.printActivites = printActivites;
+  /**
+  * @param {string}   category add Item to backlog or timeline div
+  * @param {string}   id id of the item you want to delete
+  */
   function deleteActivity(category, id) {
     // Überprüfen, ob die Kategorie existiert
     if (!activities[category]) {
@@ -54,6 +70,31 @@ function App() {
     }));
   }
   window.deleteActivity = deleteActivity;
+  
+  /**
+  * @param {string}   activityId the id of the activity you want to edit
+  * @param {string}   updatedActivity the updated activity
+  */
+  function editActivity(activityId, updatedActivity) {
+    setActivities((prevActivities) => {
+      // Finde den Index der Aktivität mit der entsprechenden ID im "backlog"
+      const updatedBacklog = prevActivities.backlog.map((activity) => 
+        activity.id === activityId ? { ...activity, ...updatedActivity } : activity
+      );
+  
+      // Aktualisiere den Zustand
+      const updatedActivities = {
+        ...prevActivities,
+        backlog: updatedBacklog,
+      };
+  
+      // Speichere die Änderungen im localStorage
+      localStorage.setItem('activities', JSON.stringify(updatedActivities));
+  
+      return updatedActivities;
+    });
+  }
+  window.editActivity = editActivity;
   return (
     <>
     
@@ -111,22 +152,15 @@ function App() {
       >
         Backlog
       </h1>
-      <TextField
-        label="suche Orte / Hotels"
-        style={{margin: "10px"}}
-        sx={{
-          width: '100%',
-          backgroundColor: 'white',
-          borderRadius: '20px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '20px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderRadius: '20px',
-          },
-        }}
-      ></TextField>
+      <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+      <div style={{ margin: "10px" , width:"100%"}}>
+        <MapsSearchbar insertActivity={insertActivity} />
+      </div>
+      </LoadScript>
+
+
       
+
       {activities.backlog.map((activity, index) => (
           <Activity
             key={index}
@@ -184,6 +218,7 @@ function App() {
         ))}
     </div>
   </div>
+  <Button variant="contained" onClick={updateJson}>save changes</Button>
 </div>
     </>
   )

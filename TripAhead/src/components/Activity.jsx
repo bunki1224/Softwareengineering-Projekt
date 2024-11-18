@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Chip, Box, Rating, Button, Modal } from '@mui/material';
+import { Card, CardContent, Typography, Chip, Box, Rating, Button, Modal, TextField } from '@mui/material';
 import { styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 
@@ -92,11 +92,11 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
       >
         <Box sx={ModalStyle}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            //ToDo:
+            Activity Title.//What should we put here?
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            editable values...
-          </Typography>
+            <Box component="form" noValidate autoComplete="off">
+              <TextField id="outlined-basic" label="Address" variant="outlined" />
+          </Box>
         </Box>
       </Modal>
     </div>

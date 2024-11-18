@@ -12,7 +12,7 @@ const ActivityCard = styled(Card)(({ theme }) => ({
   margin: theme.spacing(1),
   borderRadius: theme.spacing(2),
   boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-  minHeight: 120,
+  minHeight: 120, // Feste Mindesthoehe
   flexShrink: 0,
   width: "95%",
 }));
@@ -79,18 +79,21 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
   return (
     <ActivityCard>
       <CardContent sx={{ flex: 1 }}>
+        {/* Title */}
         <Typography variant="h6"
         component="div"
         gutterBottom>
           {activityData.title}
         </Typography>
 
+        {/* Address */}
         <Typography
         variant="body2"
         color="textSecondary">
           {activityData.address}
         </Typography>
 
+        {/* Price and Tags */}
         <Box sx={{ display: 'flex',
           alignItems: 'center',
           mt: 1 }}>
@@ -104,14 +107,22 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
             label={tag} />
           ))}
 
+          {/* Rating */}
           <Rating
           value={activityData.rating}
           precision="0.5"
           readOnly
           size="small" />
 
+          {/* Edit Button and Edit Modal*/}
           <div>
-            <Button variant='outlined' startIcon={<EditIcon />} onClick={handleOpen}>Edit</Button>
+            <Button
+            variant='outlined'
+            startIcon={<EditIcon />}
+            onClick={handleOpen}>
+              Edit
+              </Button>
+
             <Modal
               open={open}
               onClose={handleClose}

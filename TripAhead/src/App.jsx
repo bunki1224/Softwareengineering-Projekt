@@ -71,8 +71,30 @@ function App() {
   }
   window.deleteActivity = deleteActivity;
   
-    
+  /**
+  * @param {string}   activityId the id of the activity you want to edit
+  * @param {string}   updatedActivity the updated activity
+  */
+  function editActivity(activityId, updatedActivity) {
+    setActivities((prevActivities) => {
+      // Finde den Index der Aktivität mit der entsprechenden ID im "backlog"
+      const updatedBacklog = prevActivities.backlog.map((activity) => 
+        activity.id === activityId ? { ...activity, ...updatedActivity } : activity
+      );
   
+      // Aktualisiere den Zustand
+      const updatedActivities = {
+        ...prevActivities,
+        backlog: updatedBacklog,
+      };
+  
+      // Speichere die Änderungen im localStorage
+      localStorage.setItem('activities', JSON.stringify(updatedActivities));
+  
+      return updatedActivities;
+    });
+  }
+  window.editActivity = editActivity;
   return (
     <>
     

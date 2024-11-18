@@ -3,6 +3,7 @@ import { Autocomplete } from "@react-google-maps/api";
 
 const MapsSearchbar = ({ insertActivity }) => {
   const [autocomplete, setAutocomplete] = useState(null);
+  const [searchInput, setSearchInput] = useState(""); // Zustand für das Eingabefeld
 
   const onLoad = (autoC) => setAutocomplete(autoC);
 
@@ -17,7 +18,7 @@ const MapsSearchbar = ({ insertActivity }) => {
       const name = place.name || "Unbekannter Ort";
       const address = place.formatted_address || "Adresse nicht verfügbar";
       const location = place.geometry?.location || "Keine Koordinaten verfügbar";
-      
+
       const rating = place.rating || "Keine Bewertung verfügbar";
 
       const coordinates = location
@@ -47,6 +48,9 @@ const MapsSearchbar = ({ insertActivity }) => {
 
       // Aufruf der Methode über die Props
       insertActivity("backlog", activity);
+
+      // Suchleiste leeren
+      setSearchInput("");
     } else {
       console.log("Autocomplete ist nicht geladen.");
     }
@@ -58,7 +62,9 @@ const MapsSearchbar = ({ insertActivity }) => {
         <input
           type="text"
           placeholder="Ort suchen..."
-          style={{ 
+          value={searchInput} // Gebunden an den Zustand
+          onChange={(e) => setSearchInput(e.target.value)} // Zustand bei Eingabe aktualisieren
+          style={{
             width: "100%",
             height: "40px",
             color: "black",

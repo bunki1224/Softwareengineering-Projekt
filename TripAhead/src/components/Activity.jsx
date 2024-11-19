@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Chip, Box, Rating, Button, Modal, TextField } from '@mui/material';
+import { Card, CardContent, Typography, Chip, Box, Rating, Button, IconButton, Modal, TextField } from '@mui/material';
 import { styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 import CustomTextField from "./CustomTextField";
@@ -116,12 +116,10 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
 
           {/* Edit Button and Edit Modal*/}
           <div>
-            <Button
-            variant='outlined'
-            startIcon={<EditIcon />}
+            <IconButton
             onClick={handleOpen}>
-              Edit
-              </Button>
+              <EditIcon/>
+              </IconButton>
 
             <Modal
               open={open}

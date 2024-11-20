@@ -55,7 +55,7 @@ const textFieldStyle = {
   margin: 'normal',
 };
 
-const Activity = ({ title, address, price, tags, rating, image }) => {
+const Activity = ({ id, title, address, price, tags, rating, image, onEdit }) => {
   const [activityData, setActivityData] = useState({ title, address, price, tags, rating, image });
   const [open, setOpen] = useState(false);
   const [inputValues, setInputValues] = useState({ title, address, price, tags: tags.join(', '), rating, image });
@@ -69,12 +69,19 @@ const Activity = ({ title, address, price, tags, rating, image }) => {
   };
 
   const updateActivity = () => {
+    console.log("updateActivity was valled"); 
     setActivityData({
+      ...inputValues,
+      tags: inputValues.tags.split(',').map(tag => tag.trim())
+    });
+
+    onEdit(id, {
       ...inputValues,
       tags: inputValues.tags.split(',').map(tag => tag.trim())
     });
     handleClose();
   };
+
 
   return (
     <ActivityCard>

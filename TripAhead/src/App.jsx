@@ -16,27 +16,28 @@ function App() {
 
   useEffect(() => {
     // Speichern der Aktivitäten im lokalen Speicher, wenn sie sich ändern
+    //console.log("activities changed");
     localStorage.setItem('activities', JSON.stringify(activities));
   }, [activities]);
 
-  console.log(localStorage.getItem('activities'));
 
-  /**
-  * @param {string}   category add Item to backlog or timeline div
-  * @param {object}   item Item to create an Activity
-  */
-  function insertActivity(category, item) {
-    // Überprüfen, ob die Kategorie existiert
-    if (!activities[category]) {
-      console.error(`Kategorie "${category}" existiert nicht.`);
-      return;
-    }
+  function insertActivity(item) {
+    
+    const activitiesbefore = activities;
+    const itemToAdd = item;
 
-    // Zustand aktualisieren
-    setActivities((prevActivities) => ({
-      ...prevActivities,
-      [category]: [item, ...prevActivities[category]], // Neues Objekt hinzufügen
-    }));
+    //console.log("activities before: ", activitiesbefore);
+    //console.log("item to add: ", itemToAdd);
+
+    const newActivities = {
+      ...activitiesbefore,
+      backlog: [itemToAdd, ...activitiesbefore.backlog],
+    };
+    
+    setActivities(newActivities);
+
+    //console.log("new activities: ", newActivities);
+
   }
   window.insertActivity = insertActivity;
   
@@ -76,25 +77,35 @@ function App() {
   * @param {string}   updatedActivity the updated activity
   */
   function editActivity(activityId, updatedActivity) {
-    setActivities((prevActivities) => {
-      // Finde den Index der Aktivität mit der entsprechenden ID im "backlog"
-      const updatedBacklog = prevActivities.backlog.map((activity) => 
+    setActivities((prevActivities) => ({
+      ...prevActivities,
+      backlog: prevActivities.backlog.map((activity) =>
         activity.id === activityId ? { ...activity, ...updatedActivity } : activity
-      );
-  
-      // Aktualisiere den Zustand
-      const updatedActivities = {
-        ...prevActivities,
-        backlog: updatedBacklog,
-      };
-  
-      // Speichere die Änderungen im localStorage
-      localStorage.setItem('activities', JSON.stringify(updatedActivities));
-  
-      return updatedActivities;
-    });
+      ),
+    }));
   }
   window.editActivity = editActivity;
+
+  function clearStorage() {
+    localStorage.clear();
+    setActivities({ backlog: [], timeline: [] });
+  }
+
+  function addDummy(){
+    insertActivity({
+      id: Math.random().toString(36).substr(2, 9),
+      title: "Dummy",
+      address: "Dummy",
+      price: "Dummy",
+      tags: ["Dummy"],
+      rating: 5,
+      image: "https://source.unsplash.com/random/300x200",
+    });
+  }
+  function printLocalStorage() {
+    console.log(localStorage.getItem('activities'));
+  }
+
   return (
     <>
     
@@ -163,13 +174,15 @@ function App() {
 
       {activities.backlog.map((activity, index) => (
           <Activity
-            key={index}
+            key={activity.id}
+            id={activity.id}
             title={activity.title}
             address={activity.address}
             price={activity.price}
             tags={activity.tags}
             rating={activity.rating}
             image={activity.image}
+            onEdit={editActivity}
           />
         ))}
 
@@ -207,18 +220,22 @@ function App() {
       {/* Weitere Inhalte hier */}
       {activities.timeline.map((activity, index) => (
           <Activity
-            key={index}
+            key={activity.id}
             title={activity.title}
             address={activity.address}
             price={activity.price}
             tags={activity.tags}
             rating={activity.rating}
             image={activity.image}
+            onEdit={editActivity}
           />
         ))}
     </div>
   </div>
-  <Button variant="contained" onClick={updateJson}>save changes</Button>
+  {/* <Button variant="contained" onClick={printLocalStorage}>print storage</Button>
+  <Button variant="contained" onClick={clearStorage}>clear Storage</Button>
+  <Button variant="contained" onClick={addDummy}>add dummy</Button> */}
+
 </div>
     </>
   )

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Chip, Box, Rating, Button, IconButton, Modal, TextField } from '@mui/material';
-import { styled } from '@mui/system';
+import { border, borderRadius, color, styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -20,10 +20,11 @@ const ActivityCard = styled(Card)(({ theme }) => ({
 }));
 
 const Thumbnail = styled('img')({
-  width: 100,
-  height: 100,
-  borderRadius: '10%',
+  width: 150,
+  height: 150,
+  borderRadius: '10px',
   objectFit: 'cover',
+  margin: '-10px -5px -10px -10px',
 });
 
 const PriceBadge = styled(Chip)({
@@ -47,9 +48,10 @@ const ModalStyle = {
   transform: 'translate(-50%, -50%)',
   width: 400,
   bgcolor: 'background.paper',
-  border: '2px solid #000',
+  border: '2px solid #00000000',
   boxShadow: 24,
   p: 4,
+  borderRadius: "10px"
 };
 
 const textFieldStyle = {
@@ -148,7 +150,8 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
                 <Typography
                 id="modal-modal-title"
                 variant="h6"
-                component="h2">
+                component="h2"
+                style={{color:"gray"}}>
                   Edit Activity
                 </Typography>
 

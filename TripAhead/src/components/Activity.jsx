@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, Typography, Chip, Box, Rating, Button, IconButton, Modal, TextField } from '@mui/material';
 import { styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 import CustomTextField from "./CustomTextField";
 
 const ActivityCard = styled(Card)(({ theme }) => ({
@@ -55,8 +57,8 @@ const textFieldStyle = {
   margin: 'normal',
 };
 
-const Activity = ({ id, title, address, price, tags, rating, image, onEdit }) => {
-  const [activityData, setActivityData] = useState({ title, address, price, tags, rating, image });
+const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete }) => {
+  const [activityData, setActivityData] = useState({id,  title, address, price, tags, rating, image });
   const [open, setOpen] = useState(false);
   const [inputValues, setInputValues] = useState({ title, address, price, tags: tags.join(', '), rating, image });
 
@@ -69,7 +71,7 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit }) =>
   };
 
   const updateActivity = () => {
-    console.log("updateActivity was valled"); 
+    //console.log("updateActivity was valled"); 
     setActivityData({
       ...inputValues,
       tags: inputValues.tags.split(',').map(tag => tag.trim())
@@ -82,6 +84,10 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit }) =>
     handleClose();
   };
 
+  function deleteActivity(id) {
+    //console.log("deleteActivity was called" + id);
+    onDelete(id);
+  }
 
   return (
     <ActivityCard>
@@ -126,7 +132,11 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit }) =>
             <IconButton
             onClick={handleOpen}>
               <EditIcon/>
-              </IconButton>
+            </IconButton>
+            <IconButton
+            onClick={() => deleteActivity(activityData.id)}>
+              <DeleteIcon/>
+            </IconButton>
 
             <Modal
               open={open}

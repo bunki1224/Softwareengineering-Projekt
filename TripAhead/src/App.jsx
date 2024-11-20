@@ -54,20 +54,18 @@ function App() {
   }
   window.printActivites = printActivites;
   /**
-  * @param {string}   category add Item to backlog or timeline div
   * @param {string}   id id of the item you want to delete
   */
-  function deleteActivity(category, id) {
-    // Überprüfen, ob die Kategorie existiert
-    if (!activities[category]) {
-      console.error(`Kategorie "${category}" existiert nicht.`);
-      return;
-    }
+  function deleteActivity(id) {
 
     // Zustand aktualisieren
     setActivities((prevActivities) => ({
       ...prevActivities,
-      [category]: prevActivities[category].filter((activity) => activity.id !== id),
+      ["backlog"]: prevActivities["backlog"].filter((activity) => activity.id !== id),
+    }));
+    setActivities((prevActivities) => ({
+      ...prevActivities,
+      ["timeline"]: prevActivities["timeline"].filter((activity) => activity.id !== id),
     }));
   }
   window.deleteActivity = deleteActivity;
@@ -183,6 +181,7 @@ function App() {
             rating={activity.rating}
             image={activity.image}
             onEdit={editActivity}
+            onDelete={deleteActivity}
           />
         ))}
 

@@ -14,6 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set permissions for Nginx
+        run: |
+          sudo chown -R www-data:www-data /home/github/actions-runner/_work/Softwareengineering-Projekt/Softwareengineering-Projekt/TripAhead/build
+          sudo chmod -R 755 /home/github/actions-runner/_work/Softwareengineering-Projekt/Softwareengineering-Projekt/TripAhead/build
       # Node.js installieren
       - name: Set up Node.js
         uses: actions/setup-node@v3

@@ -48,7 +48,6 @@ const MapsSearchbar = ({ insertActivity }) => {
 
       // Aufruf der Methode über die Props
       insertActivity(activity);
-      window.lcoation.reload();
       // Suchleiste leeren
       setSearchInput("");
     } else {

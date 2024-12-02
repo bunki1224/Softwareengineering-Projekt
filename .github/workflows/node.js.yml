@@ -18,7 +18,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' # Passe die Node.js-Version an deine Anforderungen an
+          node-version: '20' # Passe die Node.js-Version an deine Anforderungen an
 
       # In den Tripahead-Ordner wechseln
       - name: Change directory to Tripahead

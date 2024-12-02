@@ -21,21 +21,21 @@ jobs:
           node-version: '20' # Passe die Node.js-Version an deine Anforderungen an
 
       # In den Tripahead-Ordner wechseln
-      - name: Change directory to Tripahead
-        working-directory: Tripahead
-        run: echo "Working in Tripahead folder"
+      - name: Change directory to TripAhead
+        working-directory: TripAhead
+        run: echo "Working in TripAhead folder"
 
       # Abhängigkeiten installieren
       - name: Install dependencies
-        working-directory: Tripahead
+        working-directory: TripAhead
         run: npm install
 
       # Build der React-App
       - name: Build React App
-        working-directory: Tripahead
+        working-directory: TripAhead
         run: npm run build
 
       # Tests ausführen (optional)
       - name: Run tests
-        working-directory: Tripahead
+        working-directory: TripAhead
         run: npm test

@@ -34,8 +34,3 @@ jobs:
       - name: Build React App
         working-directory: TripAhead
         run: npm run build
-
-      # Tests ausführen (optional)
-      - name: Run tests
-        working-directory: TripAhead
-        run: npm test

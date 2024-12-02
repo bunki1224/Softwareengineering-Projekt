@@ -3,7 +3,7 @@ import Activity from "./components/Activity";
 import CustomRating from "./components/CustomRating";
 import ReactDOM from "react-dom/client";
 import { useEffect, useState } from "react";
-import MapsSearchbar from "./components/mapsSearchbar";
+import MapsSearchbar from "./components/MapsSearchbar";
 import { LoadScript } from "@react-google-maps/api";
 
 

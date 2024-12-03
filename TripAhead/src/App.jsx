@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import MapsSearchbar from "./components/MapsSearchbar";
 import { LoadScript } from "@react-google-maps/api";
 
+//Test Kommentar für Github-Actions
 
 function App() {
 

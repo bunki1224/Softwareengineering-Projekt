@@ -38,4 +38,4 @@ jobs:
       # Starten der App mit node serve
       - name: Start App with node serve
         working-directory: TripAhead
-        run: npx serve -s build
+        run: npx serve -s build &

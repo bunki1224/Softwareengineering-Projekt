@@ -34,3 +34,8 @@ jobs:
       - name: Build React App
         working-directory: TripAhead
         run: npm run build
+
+      # Starten der App mit node serve
+      - name: Start App with node serve
+        working-directory: TripAhead
+        run: npx serve -s build

@@ -38,4 +38,4 @@ jobs:
       # Starten der App mit node serve
       - name: Start App with node serve
         working-directory: TripAhead
-        run: nohup serve -s dist --listen 0.0.0.0:5000 > app.log 2>&1 &
+        run: serve dist/ -- &

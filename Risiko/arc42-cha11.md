@@ -1,4 +1,4 @@
-## 11. Risiken und technische Schulden
+## 11. Risikomanagement
 
 Es wurde ein Risikoassessment gemäß dem RMMM-Modell durchgeführt. Die identifizierten Risiken sind anhand ihres Risiko-Scores sortiert, wobei bei gleichem Score das Risiko mit der höheren Eintrittswahrscheinlichkeit zuerst genannt wird. Das RMMM-Modell ist wird weiter unten präsentiert.
 

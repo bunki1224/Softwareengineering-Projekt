@@ -1,7 +1,7 @@
 Tabelle 1
 Risiko ID;Beschreibung;Wahrscheinlichkeit(sklasse);Schadenshöhe;Risiko Score;Minimierungs-Strategie;Indikatoren;Notfallplan;Status;Verantworlicher;Datum der letzten Aktualisierung
 1;API Preis/Preismodell ändert sich,bspw., 
-Freemium --> Abo-Modell";1;2;2;"Generische  Implementierung mit hohem Abstraktionsgrad, 
+Freemium --> Abo-Modell;1;2;2;"Generische  Implementierung mit hohem Abstraktionsgrad, 
 die erlauben alternative APIs zu verwenden";Akzeptanzgrad der API, Profitabilität der API/Firma,  Trends bei API Pricing;"Suspendierung der Services,
 welche die APIs benötigen";offen;Jan Bassing;17.04.2025
 2;"Pandemie --> Reiseverbot,

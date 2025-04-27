@@ -21,3 +21,15 @@ Es wurde ein Risikoassessment gemäß dem RMMM-Modell durchgeführt. Die identif
 | 4 | Schwachstellen in NodeJS | 3 | 2 | 6 | Informiert bleiben und schnellstmöglich beheben | Hacking oder Ausnutzung von Schwachstellen | Emergency Shutdown der Applikation | offen | Cedric Noeldechen | 17.04.2025 |
 | 5 | Technische Komplexität | 2 | 1 | 2 | Mehr Zeit einplanen | Erfüllung der Aufgabe dauert länger als eingeschätzt | Features werden nicht oder nicht wie geplant implementiert (auf Kosten der User Experience) | offen | Tim Hitschfeld | 17.04.2025 |
 
+
+## 12. Glossar
+
+| Begriff             | Bedeutung                                                                 |
+|---------------------|---------------------------------------------------------------------------|
+| **API**             | Schnittstelle zur Kommunikation zwischen Softwaresystemen.                |
+| **Backend**         | Serverseitiger Teil der Anwendung, verantwortlich für Logik und Datenverarbeitung. |
+| **Frontend**        | Clientseitiger Teil der Anwendung, dargestellt mit React.                 |
+| **JavaScript**      | Programmiersprache zur Erstellung interaktiver Webanwendungen.            |
+| **NPM**             | Paketmanager zur Verwaltung von JavaScript-Abhängigkeiten.                |
+| **React**           | JavaScript-Framework für den Aufbau von Benutzeroberflächen.              |
+| **Vite**            | Build-Tool für moderne Webprojekte, optimiert für Geschwindigkeit.        |

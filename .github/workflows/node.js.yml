@@ -1,0 +1,41 @@
+name: Build and Test React App in Tripahead Folder
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: self-hosted  # Der selbst gehostete Runner wird verwendet
+    steps:
+      # Checkout des Codes
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      # Node.js installieren
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20' # Passe die Node.js-Version an deine Anforderungen an
+
+      # In den Tripahead-Ordner wechseln
+      - name: Change directory to TripAhead
+        working-directory: TripAhead
+        run: echo "Working in TripAhead folder"
+
+      # Abhängigkeiten installieren
+      - name: Install dependencies
+        working-directory: TripAhead
+        run: npm install
+
+      # Build der React-App
+      - name: Build React App
+        working-directory: TripAhead
+        run: npm run build
+
+      # Starten der App mit node serve
+      - name: Start App with node serve
+        working-directory: TripAhead
+        run: serve dist/ -- &

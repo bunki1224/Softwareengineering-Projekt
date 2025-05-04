@@ -22,7 +22,7 @@ const ActivityCard = styled(Card)(({ theme }) => ({
 const Thumbnail = styled('img')({
   width: 150,
   height: 150,
-  borderRadius: '10px',
+  borderRadius: '16px',
   objectFit: 'cover',
   margin: '-10px -5px -10px -10px',
 });

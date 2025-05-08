@@ -7,6 +7,25 @@ on:
   pull_request:
 
 jobs:
+  test:
+      runs-on: self-hosted
+      needs: build  # Führt diesen Job nur aus, wenn der Build erfolgreich war
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Set up Node.js
+          uses: actions/setup-node@v3
+          with:
+            node-version: '20'
+  
+        - name: Install dependencies
+          working-directory: TripAhead
+          run: npm install
+  
+        - name: Run Tests
+          working-directory: TripAhead
+          run: npm test
   build:
     runs-on: self-hosted  # Der selbst gehostete Runner wird verwendet
     steps:

@@ -24,7 +24,7 @@ jobs:
           run: npm install
   
         - name: Run Tests
-          working-directory: api
+          working-directory: API
           run: npm test
   build:
     runs-on: self-hosted  # Der selbst gehostete Runner wird verwendet

@@ -23,6 +23,12 @@ jobs:
           working-directory: TripAhead
           run: npm install
   
+
+  # Dependecies must be installed inside the API directory for jest to be installed and become usable
+        - name: Install Jest and other API dependencies
+          working-directory: API
+          run: npm install
+
         - name: Run Tests
           working-directory: API
           run: npm test

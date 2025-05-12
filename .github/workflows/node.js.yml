@@ -11,7 +11,7 @@ jobs:
       runs-on: self-hosted
 #      needs: build  # Führt diesen Job nur aus, wenn der Build erfolgreich war
 
-      env:  # <-- Global environment for this job (Jest will access these)
+      env:  # <-- Umgebung fuer diesen Job, Jest greift auf diese zu fuer die DB-API Tests
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASS: ${{ secrets.DB_PASS }}
@@ -31,7 +31,7 @@ jobs:
           run: npm install
   
 
-  # Dependecies must be installed inside the API directory for jest to be installed and become usable
+  # Abhaengigkeiten muessen hier auch im API Ordner installiert werden um Jest nutzbar zu machen
         - name: Install Jest and other API dependencies
           working-directory: API
           run: npm install

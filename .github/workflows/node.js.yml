@@ -10,6 +10,13 @@ jobs:
   test:
       runs-on: self-hosted
 #      needs: build  # Führt diesen Job nur aus, wenn der Build erfolgreich war
+
+      env:  # <-- Global environment for this job (Jest will access these)
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASS: ${{ secrets.DB_PASS }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+
       steps:
         - name: Checkout code
           uses: actions/checkout@v3
@@ -28,15 +35,6 @@ jobs:
         - name: Install Jest and other API dependencies
           working-directory: API
           run: npm install
-
-
-        - name: Create .env file
-          working-directory: API
-          run: |
-            echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
 
         - name: Run Tests
           working-directory: API

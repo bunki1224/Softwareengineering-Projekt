@@ -5,6 +5,7 @@ import ReactDOM from "react-dom/client";
 import { useEffect, useState } from "react";
 import MapsSearchbar from "./components/MapsSearchbar";
 import { LoadScript } from "@react-google-maps/api";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 //Test Kommentar für Github-Actions
 
@@ -105,6 +106,49 @@ function App() {
     console.log(localStorage.getItem('activities'));
   }
 
+  const onDragEnd = (result) => {
+    const { source, destination } = result;
+
+    // If dropped outside a droppable area
+    if (!destination) return;
+
+    // If dropped in the same position
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
+
+    // Moving within the same list
+    if (source.droppableId === destination.droppableId) {
+      const list = source.droppableId;
+      const newItems = Array.from(activities[list]);
+      const [removed] = newItems.splice(source.index, 1);
+      newItems.splice(destination.index, 0, removed);
+
+      setActivities({
+        ...activities,
+        [list]: newItems,
+      });
+    } 
+    // Moving between lists
+    else {
+      const sourceList = source.droppableId;
+      const destList = destination.droppableId;
+      const sourceItems = Array.from(activities[sourceList]);
+      const destItems = Array.from(activities[destList]);
+      const [removed] = sourceItems.splice(source.index, 1);
+      destItems.splice(destination.index, 0, removed);
+
+      setActivities({
+        ...activities,
+        [sourceList]: sourceItems,
+        [destList]: destItems,
+      });
+    }
+  };
+
   return (
     <>
     
@@ -126,112 +170,156 @@ function App() {
     transform: 'translate(-50%, -50%)',
   }}
 >
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-around',
-      alignItems: 'center',
-      width: '100%',
-      height: '100%',
-    }}
-  >
+  <DragDropContext onDragEnd={onDragEnd}>
     <div
-      id="backlog"
       style={{
-        backgroundColor: '#424b64',
-        width: '45%',
-        height: '80%',
         display: 'flex',
-        flexDirection: 'column',
+        justifyContent: 'space-around',
         alignItems: 'center',
-        justifyContent: 'start',
-        margin: '1rem',
-        borderRadius: '10px',
-        overflowY: 'auto', // Ermöglicht vertikales Scrollen
-        overflowX: 'hidden', // Verhindert horizontales Scrollen
-        padding: '1rem',
+        width: '100%',
+        height: '100%',
       }}
     >
-      <h1
-        style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: '1rem',
-        }}
-      >
-        Backlog
-      </h1>
-      <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
-      <div style={{ margin: "10px" , width:"100%"}}>
-        <MapsSearchbar insertActivity={insertActivity} />
-      </div>
-      </LoadScript>
+      <Droppable droppableId="backlog">
+        {(provided) => (
+          <div
+            id="backlog"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{
+              backgroundColor: '#424b64',
+              width: '45%',
+              height: '80%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'start',
+              margin: '1rem',
+              borderRadius: '10px',
+              overflowY: 'auto', // Ermöglicht vertikales Scrollen
+              overflowX: 'hidden', // Verhindert horizontales Scrollen
+              padding: '1rem',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              Backlog
+            </h1>
+            <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+            <div style={{ margin: "10px" , width:"100%"}}>
+              <MapsSearchbar insertActivity={insertActivity} />
+            </div>
+            </LoadScript>
 
 
-      
-
-      {activities.backlog.map((activity, index) => (
-          <Activity
-            key={activity.id}
-            id={activity.id}
-            title={activity.title}
-            address={activity.address}
-            price={activity.price}
-            tags={activity.tags}
-            rating={activity.rating}
-            image={activity.image}
-            onEdit={editActivity}
-            onDelete={deleteActivity}
-          />
-        ))}
-
-
-    </div>
-    
-    <div
-      id="timeline"
-      style={{
-        backgroundColor: '#424b64',
-        width: '45%',
-        height: '80%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'start',
-        margin: '1rem',
-        borderRadius: '10px',
-        overflowY: 'auto', // Ermöglicht vertikales Scrollen
-        overflowX: 'hidden', // Verhindert horizontales Scrollen
-        padding: '1rem',
-      }}
-    >
-      <h1
-        style={{
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginBottom: '1rem',
-        }}
-      >
-        Timeline
-      </h1>
             
-      {/* Weitere Inhalte hier */}
-      {activities.timeline.map((activity, index) => (
-          <Activity
-            key={activity.id}
-            title={activity.title}
-            address={activity.address}
-            price={activity.price}
-            tags={activity.tags}
-            rating={activity.rating}
-            image={activity.image}
-            onEdit={editActivity}
-          />
-        ))}
+
+            {activities.backlog.map((activity, index) => (
+              <Draggable key={activity.id} draggableId={activity.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                      width: '100%',
+                      ...provided.draggableProps.style
+                    }}
+                  >
+                    <Activity
+                      id={activity.id}
+                      title={activity.title}
+                      address={activity.address}
+                      price={activity.price}
+                      tags={activity.tags}
+                      rating={activity.rating}
+                      image={activity.image}
+                      onEdit={editActivity}
+                      onDelete={deleteActivity}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+
+
+          </div>
+        )}
+      </Droppable>
+      
+      <Droppable droppableId="timeline">
+        {(provided) => (
+          <div
+            id="timeline"
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            style={{
+              backgroundColor: '#424b64',
+              width: '45%',
+              height: '80%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'start',
+              margin: '1rem',
+              borderRadius: '10px',
+              overflowY: 'auto', // Ermöglicht vertikales Scrollen
+              overflowX: 'hidden', // Verhindert horizontales Scrollen
+              padding: '1rem',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              Timeline
+            </h1>
+                
+            {/* Weitere Inhalte hier */}
+            {activities.timeline.map((activity, index) => (
+              <Draggable key={activity.id} draggableId={activity.id} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    style={{
+                      width: '100%',
+                      ...provided.draggableProps.style
+                    }}
+                  >
+                    <Activity
+                      id={activity.id}
+                      title={activity.title}
+                      address={activity.address}
+                      price={activity.price}
+                      tags={activity.tags}
+                      rating={activity.rating}
+                      image={activity.image}
+                      onEdit={editActivity}
+                      onDelete={deleteActivity}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
-  </div>
+  </DragDropContext>
   {/* <Button variant="contained" onClick={printLocalStorage}>print storage</Button>
   <Button variant="contained" onClick={clearStorage}>clear Storage</Button>
   <Button variant="contained" onClick={addDummy}>add dummy</Button> */}

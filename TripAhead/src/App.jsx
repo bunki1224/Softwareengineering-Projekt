@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import MapsSearchbar from "./components/MapsSearchbar";
 import { LoadScript } from "@react-google-maps/api";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import AddActivityModal from "./components/AddActivityModal";
 
 //Test Kommentar für Github-Actions
 
@@ -211,11 +212,19 @@ function App() {
             >
               Backlog
             </h1>
-            <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
-            <div style={{ margin: "10px" , width:"100%"}}>
-              <MapsSearchbar insertActivity={insertActivity} />
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              width: '100%',
+              marginBottom: '1rem'
+            }}>
+              <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+                <div style={{ flex: 1, marginRight: '10px' }}>
+                  <MapsSearchbar insertActivity={insertActivity} />
+                </div>
+              </LoadScript>
+              <AddActivityModal onAdd={insertActivity} />
             </div>
-            </LoadScript>
 
 
             

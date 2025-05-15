@@ -1,6 +1,7 @@
 import './Homepage.css';
 import { useState, useEffect } from 'react';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -35,8 +36,10 @@ const DayTitle = styled(Box)(({ theme }) => ({
 }));
 
 function Homepage() {
+  const navigate = useNavigate();
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_Map_Api_Key
+    googleMapsApiKey: import.meta.env.VITE_Map_Api_Key,
+    libraries: ["places"]
   });
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [currentDay, setCurrentDay] = useState(0);
@@ -44,7 +47,7 @@ function Homepage() {
   const [dayTitles, setDayTitles] = useState({});
   const [maxDays, setMaxDays] = useState(7);
 
-  // Load activities and day titles from localStorage
+  // Force reload when component mounts
   useEffect(() => {
     const savedActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
     const savedDayTitles = JSON.parse(localStorage.getItem('dayTitles')) || {};
@@ -53,8 +56,8 @@ function Homepage() {
     
     // Calculate max days based on activities
     const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
-    setMaxDays(Math.max(maxDay + 1, 7)); // At least 7 days
-  }, []);
+    setMaxDays(Math.max(maxDay + 1, 7));
+  }, [navigate]); // This will run every time we navigate to the homepage
 
   // Listen for changes in localStorage
   useEffect(() => {
@@ -64,13 +67,21 @@ function Homepage() {
       setActivities(savedActivities);
       setDayTitles(savedDayTitles);
       
-      // Update max days if needed
+      // Calculate max days based on activities
       const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
       setMaxDays(Math.max(maxDay + 1, 7));
     };
 
+    // Set up interval to check for changes
+    const intervalId = setInterval(handleStorageChange, 1000);
+
+    // Also listen for storage events (for cross-tab updates)
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleNextDay = () => {
@@ -88,9 +99,6 @@ function Homepage() {
   // Filter activities for current day
   const dayActivities = activities.timeline.filter(activity => activity.day === currentDay);
   const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
-
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading Maps</div>;
 
   return (
     <div className="layout">
@@ -167,19 +175,54 @@ function Homepage() {
           </div>
         </div>
         <div className="mapPanel">
-          <GoogleMap
-            mapContainerClassName="mapContainer"
-            center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : { lat: 35.6762, lng: 139.6503 }}
-            zoom={12}
-          >
-            {activities.timeline.map((activity) => (
-              <Marker
-                key={activity.id}
-                position={activity.position}
-                onClick={() => setSelectedIdx(activity.id)}
-              />
-            ))}
-          </GoogleMap>
+          {loadError ? (
+            <div style={{ 
+              width: '100%', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: 'white',
+              backgroundColor: '#2c3446'
+            }}>
+              Error loading maps
+            </div>
+          ) : !isLoaded ? (
+            <div style={{ 
+              width: '100%', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: 'white',
+              backgroundColor: '#2c3446'
+            }}>
+              Loading Maps...
+            </div>
+          ) : (
+            <GoogleMap
+              mapContainerClassName="mapContainer"
+              center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : { lat: 35.6762, lng: 139.6503 }}
+              zoom={12}
+              options={{
+                styles: [
+                  {
+                    featureType: "all",
+                    elementType: "all",
+                    stylers: [{ color: "#2c3446" }]
+                  }
+                ]
+              }}
+            >
+              {activities.timeline.map((activity) => (
+                <Marker
+                  key={activity.id}
+                  position={activity.position}
+                  onClick={() => setSelectedIdx(activity.id)}
+                />
+              ))}
+            </GoogleMap>
+          )}
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { Routes, Route } from 'react-router-dom';
 import { Button, Typography } from "@mui/material";
 import Activity from "./components/Activity";
 import CustomRating from "./components/CustomRating";
@@ -8,6 +9,8 @@ import { LoadScript } from "@react-google-maps/api";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import AddActivityModal from "./components/AddActivityModal";
 import TimelineView from "./components/TimelineView";
+import Homepage from "./Pages/Homepage";
+import Navbar from "./components/Navbar";
 
 //Test Kommentar für Github-Actions
 
@@ -257,146 +260,145 @@ function App() {
 
   return (
     <>
-    
-      
-
-<div
-  id="wrapper"
-  style={{
-    width: '100vw',
-    height: '100vh',
-    backgroundColor: '#213243',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-  }}
->
-  <DragDropContext onDragEnd={onDragEnd}>
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        width: '100%',
-        height: '100%',
-      }}
-    >
-      <Droppable droppableId="backlog">
-        {(provided) => (
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Homepage />} />
+        <Route path="/homepage" element={<Homepage />} />
+        <Route path="/backlog" element={
           <div
-            id="backlog"
-            ref={provided.innerRef}
-            {...provided.droppableProps}
+            id="wrapper"
             style={{
-              backgroundColor: '#424b64',
-              width: '45%',
-              height: '80%',
+              width: '100vw',
+              height: 'calc(100vh - 64px)', // Adjust for navbar height
+              backgroundColor: '#213243',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'start',
-              margin: '1rem',
-              borderRadius: '10px',
-              overflowY: 'auto', // Ermöglicht vertikales Scrollen
-              overflowX: 'hidden', // Verhindert horizontales Scrollen
-              padding: '1rem',
+              justifyContent: 'center',
+              marginTop: '64px', // Add margin for navbar
             }}
           >
-            <h1
-              style={{
-                fontSize: '2rem',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                marginBottom: '1rem',
-              }}
-            >
-              Backlog
-            </h1>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              width: '100%',
-              marginBottom: '1rem'
-            }}>
-              <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
-                <div style={{ flex: 1, marginRight: '10px' }}>
-                  <MapsSearchbar insertActivity={insertActivity} />
+            <DragDropContext onDragEnd={onDragEnd}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  alignItems: 'center',
+                  width: '100%',
+                  height: '100%',
+                }}
+              >
+                <Droppable droppableId="backlog">
+                  {(provided) => (
+                    <div
+                      id="backlog"
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      style={{
+                        backgroundColor: '#424b64',
+                        width: '45%',
+                        height: '80%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'start',
+                        margin: '1rem',
+                        borderRadius: '10px',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        padding: '1rem',
+                      }}
+                    >
+                      <h1
+                        style={{
+                          fontSize: '2rem',
+                          fontWeight: 'bold',
+                          textAlign: 'center',
+                          marginBottom: '1rem',
+                          color: 'white'
+                        }}
+                      >
+                        Backlog
+                      </h1>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        width: '100%',
+                        marginBottom: '1rem'
+                      }}>
+                        <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+                          {(loadError, isLoaded) => {
+                            if (loadError) return <div>Error loading maps</div>;
+                            if (!isLoaded) return <div>Loading Maps</div>;
+                            return (
+                              <div style={{ flex: 1, marginRight: '10px' }}>
+                                <MapsSearchbar insertActivity={insertActivity} />
+                              </div>
+                            );
+                          }}
+                        </LoadScript>
+                        <AddActivityModal onAdd={insertActivity} />
+                      </div>
+
+                      {activities.backlog.map((activity, index) => (
+                        <Draggable key={activity.id} draggableId={activity.id} index={index}>
+                          {(provided) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              style={{
+                                width: '100%',
+                                ...provided.draggableProps.style
+                              }}
+                            >
+                              <Activity
+                                id={activity.id}
+                                title={activity.title}
+                                address={activity.address}
+                                price={activity.price}
+                                tags={activity.tags}
+                                rating={activity.rating}
+                                image={activity.image}
+                                onEdit={editActivity}
+                                onDelete={deleteActivity}
+                              />
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+                
+                <div
+                  style={{
+                    width: '45%',
+                    height: '80%',
+                    margin: '1rem',
+                  }}
+                >
+                  <TimelineView
+                    activities={activities.timeline}
+                    onDelete={deleteActivity}
+                    onEdit={editActivity}
+                    currentDay={currentDay}
+                    onDayChange={setCurrentDay}
+                    maxDays={maxDays}
+                    onAddDay={handleAddDay}
+                    onRemoveDay={handleRemoveDay}
+                    dayTitles={dayTitles}
+                    onUpdateDayTitle={handleUpdateDayTitle}
+                  />
                 </div>
-              </LoadScript>
-              <AddActivityModal onAdd={insertActivity} />
-            </div>
-
-
-            
-
-            {activities.backlog.map((activity, index) => (
-              <Draggable key={activity.id} draggableId={activity.id} index={index}>
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={{
-                      width: '100%',
-                      ...provided.draggableProps.style
-                    }}
-                  >
-                    <Activity
-                      id={activity.id}
-                      title={activity.title}
-                      address={activity.address}
-                      price={activity.price}
-                      tags={activity.tags}
-                      rating={activity.rating}
-                      image={activity.image}
-                      onEdit={editActivity}
-                      onDelete={deleteActivity}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-
-
+              </div>
+            </DragDropContext>
           </div>
-        )}
-      </Droppable>
-      
-      <div
-        style={{
-          width: '45%',
-          height: '80%',
-          margin: '1rem',
-        }}
-      >
-        <TimelineView
-          activities={activities.timeline}
-          onDelete={deleteActivity}
-          onEdit={editActivity}
-          currentDay={currentDay}
-          onDayChange={setCurrentDay}
-          maxDays={maxDays}
-          onAddDay={handleAddDay}
-          onRemoveDay={handleRemoveDay}
-          dayTitles={dayTitles}
-          onUpdateDayTitle={handleUpdateDayTitle}
-        />
-      </div>
-    </div>
-  </DragDropContext>
-  {/* <Button variant="contained" onClick={printLocalStorage}>print storage</Button>
-  <Button variant="contained" onClick={clearStorage}>clear Storage</Button>
-  <Button variant="contained" onClick={addDummy}>add dummy</Button> */}
-
-</div>
+        } />
+      </Routes>
     </>
-  )
+  );
 }
 
 export default App;

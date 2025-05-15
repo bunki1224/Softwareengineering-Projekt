@@ -3,6 +3,7 @@ import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import HomeIcon from '@mui/icons-material/Home';
+import ListIcon from '@mui/icons-material/List';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -37,6 +38,10 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleHomeClick = () => {
+    window.location.href = '/homepage'; // This will force a full page refresh
+  };
+
   const isActive = (path) => {
     return location.pathname === path;
   };
@@ -48,12 +53,25 @@ function Navbar() {
           <TimelineIcon /> TripAhead
         </Logo>
         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-          <NavButton
+          <Button
+            color="inherit"
             startIcon={<HomeIcon />}
-            onClick={() => navigate('/')}
-            active={isActive('/')}
+            onClick={handleHomeClick}
+            sx={{
+              backgroundColor: (location.pathname === '/' || location.pathname === '/homepage') ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.2)'
+              }
+            }}
           >
             Home
+          </Button>
+          <NavButton
+            startIcon={<ListIcon />}
+            onClick={() => navigate('/backlog')}
+            active={isActive('/backlog')}
+          >
+            Backlog
           </NavButton>
           <NavButton
             startIcon={<TimelineIcon />}

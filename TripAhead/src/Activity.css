@@ -1,16 +1,16 @@
 .activity-card {
     display: flex;
-    background: #fff;
+    background: #2c3446;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     margin-bottom: 18px;
     cursor: pointer;
     transition: box-shadow 0.2s, border 0.2s;
     border: 2px solid transparent;
   }
   .activity-card.selected {
-    border: 2px solid #4fc3f7;
-    box-shadow: 0 4px 16px rgba(33,150,243,0.15);
+    border: 2px solid #4CAF50;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.2);
   }
   .activity-image {
     width: 80px;
@@ -21,10 +21,12 @@
   .activity-info {
     flex: 1;
     padding: 10px 16px;
+    color: white;
   }
   .activity-info h3 {
     margin: 0 0 4px 0;
     font-size: 1.1rem;
+    color: white;
   }
   .activity-address {
     color: #888;
@@ -37,8 +39,8 @@
     margin-bottom: 4px;
   }
   .activity-type, .activity-price {
-    background: #e0f7fa;
-    color: #00796b;
+    background: #424b64;
+    color: #4CAF50;
     border-radius: 6px;
     padding: 2px 8px;
     font-size: 0.85rem;

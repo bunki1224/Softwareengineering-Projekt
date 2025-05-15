@@ -1,52 +1,93 @@
 import './Homepage.css';
-import Activity from '../Activity';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
+import { 
+  Box, 
+  Typography, 
+  IconButton,
+  Paper,
+  styled
+} from '@mui/material';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import Activity from '../components/Activity';
 
-const dummyActivities = [
-  {
-    name: 'Tokyo Skytree',
-    address: '1-chōme-1-2 Oshiage, Sumida City, Tokyo',
-    price: '20 €',
-    type: 'Sightseeing',
-    rating: 5,
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    position: { lat: 35.710063, lng: 139.8107 }
-  },
-  {
-    name: 'Meiji Shrine',
-    address: '1-1 Yoyogikamizonocho, Shibuya City, Tokyo',
-    price: 'Free',
-    type: 'Temple',
-    rating: 5,
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-    position: { lat: 35.6764, lng: 139.6993 }
-  },
-  {
-    name: 'Ichiran Shibuya',
-    address: 'Shibuya City, Jinnan, 1 Chome-22-7',
-    price: '€€',
-    type: 'Food',
-    rating: 5,
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80',
-    position: { lat: 35.6595, lng: 139.7005 }
-  },
-  {
-    name: 'Red Roof Inn Kamata',
-    address: '7 Chome-24-7 Nishikamata, Ota City, Tokyo',
-    price: '200 €',
-    type: 'Hotel',
-    rating: 4,
-    image: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
-    position: { lat: 35.5613, lng: 139.716 }
-  }
-];
+const TimelineHeader = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: theme.spacing(2),
+  backgroundColor: '#2c3446',
+  borderBottom: '1px solid #424b64',
+  gap: theme.spacing(2)
+}));
+
+const HeaderControls = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1)
+}));
+
+const DayTitle = styled(Box)(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1)
+}));
 
 function Homepage() {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_Map_Api_Key
   });
   const [selectedIdx, setSelectedIdx] = useState(null);
+  const [currentDay, setCurrentDay] = useState(0);
+  const [activities, setActivities] = useState({ backlog: [], timeline: [] });
+  const [dayTitles, setDayTitles] = useState({});
+  const [maxDays, setMaxDays] = useState(7);
+
+  // Load activities and day titles from localStorage
+  useEffect(() => {
+    const savedActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
+    const savedDayTitles = JSON.parse(localStorage.getItem('dayTitles')) || {};
+    setActivities(savedActivities);
+    setDayTitles(savedDayTitles);
+    
+    // Calculate max days based on activities
+    const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
+    setMaxDays(Math.max(maxDay + 1, 7)); // At least 7 days
+  }, []);
+
+  // Listen for changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
+      const savedDayTitles = JSON.parse(localStorage.getItem('dayTitles')) || {};
+      setActivities(savedActivities);
+      setDayTitles(savedDayTitles);
+      
+      // Update max days if needed
+      const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
+      setMaxDays(Math.max(maxDay + 1, 7));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const handleNextDay = () => {
+    if (currentDay < maxDays - 1) {
+      setCurrentDay(currentDay + 1);
+    }
+  };
+
+  const handlePreviousDay = () => {
+    if (currentDay > 0) {
+      setCurrentDay(currentDay - 1);
+    }
+  };
+
+  // Filter activities for current day
+  const dayActivities = activities.timeline.filter(activity => activity.day === currentDay);
+  const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
 
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading Maps</div>;
@@ -54,14 +95,58 @@ function Homepage() {
   return (
     <div className="layout">
       <div className="leftPanel">
-        <input type="text" placeholder="Search activities..." className="searchBar" />
-        <div className="activity-list">
-          {dummyActivities.map((activity, idx) => (
+        <TimelineHeader>
+          <HeaderControls>
+            <IconButton
+              onClick={handlePreviousDay}
+              disabled={currentDay === 0}
+              sx={{
+                color: 'white',
+                '&:hover': { color: '#4CAF50' },
+                '&.Mui-disabled': { color: '#666' }
+              }}
+            >
+              <NavigateBeforeIcon />
+            </IconButton>
+            <DayTitle>
+              <Typography variant="h6" sx={{ color: 'white' }}>
+                {currentDayTitle}
+              </Typography>
+            </DayTitle>
+            <IconButton
+              onClick={handleNextDay}
+              disabled={currentDay === maxDays - 1}
+              sx={{
+                color: 'white',
+                '&:hover': { color: '#4CAF50' },
+                '&.Mui-disabled': { color: '#666' }
+              }}
+            >
+              <NavigateNextIcon />
+            </IconButton>
+          </HeaderControls>
+        </TimelineHeader>
+        <div style={{ 
+          flex: 1, 
+          overflowY: 'auto', 
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          backgroundColor: '#424b64'
+        }}>
+          {dayActivities.map((activity) => (
             <Activity
-              key={idx}
-              {...activity}
-              selected={selectedIdx === idx}
-              onClick={() => setSelectedIdx(idx)}
+              key={activity.id}
+              id={activity.id}
+              title={activity.title}
+              address={activity.address}
+              price={activity.price}
+              tags={activity.tags}
+              rating={activity.rating}
+              image={activity.image}
+              selected={selectedIdx === activity.id}
+              onClick={() => setSelectedIdx(activity.id)}
             />
           ))}
         </div>
@@ -78,24 +163,20 @@ function Homepage() {
           </div>
           <div className="box">
             <h3>Weather</h3>
-            <p>10°C Rainy</p>
+            <p>Sunny</p>
           </div>
         </div>
         <div className="mapPanel">
           <GoogleMap
             mapContainerClassName="mapContainer"
-            center={selectedIdx !== null ? dummyActivities[selectedIdx].position : { lat: 35.6895, lng: 139.6917 }}
+            center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : { lat: 35.6762, lng: 139.6503 }}
             zoom={12}
           >
-            {dummyActivities.map((activity, idx) => (
+            {activities.timeline.map((activity) => (
               <Marker
-                key={idx}
+                key={activity.id}
                 position={activity.position}
-                label={activity.name[0]}
-                icon={selectedIdx === idx ? {
-                  url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                } : undefined}
-                onClick={() => setSelectedIdx(idx)}
+                onClick={() => setSelectedIdx(activity.id)}
               />
             ))}
           </GoogleMap>

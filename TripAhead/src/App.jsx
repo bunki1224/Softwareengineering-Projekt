@@ -263,8 +263,8 @@ function App() {
 <div
   id="wrapper"
   style={{
-    width: '95vw',
-    height: '80vh',
+    width: '100vw',
+    height: '100vh',
     backgroundColor: '#213243',
     display: 'flex',
     flexDirection: 'column',

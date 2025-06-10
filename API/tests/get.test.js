@@ -56,7 +56,7 @@ describe('my test', ()=>{
           });
       
         expect([200, 404]).toContain(res.statusCode); // 200 = Erfolg, 404 = User nicht vorhanden
-      });
+    });
 
     test('PUT /activities should update existing activity by ID', async () => {
     const res = await request(app)
@@ -72,7 +72,7 @@ describe('my test', ()=>{
     });
       
         expect([200, 404]).toContain(res.statusCode); // 200 = ok, 404 = nicht gefunden
-      });
+    });
 });
 
 

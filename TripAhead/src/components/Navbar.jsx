@@ -4,6 +4,8 @@ import { styled } from '@mui/material/styles';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import HomeIcon from '@mui/icons-material/Home';
 import ListIcon from '@mui/icons-material/List';
+import CardTravelIcon from '@mui/icons-material/CardTravel';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
@@ -37,9 +39,16 @@ const Logo = styled(Typography)(({ theme }) => ({
 function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const username = localStorage.getItem('username');
 
   const handleHomeClick = () => {
-    window.location.href = '/homepage'; // This will force a full page refresh
+    navigate('/');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
+    navigate('/login');
   };
 
   const isActive = (path) => {
@@ -53,26 +62,29 @@ function Navbar() {
           <TimelineIcon /> TripAhead
         </Logo>
         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-          <Button
-            color="inherit"
+          <NavButton
             startIcon={<HomeIcon />}
             onClick={handleHomeClick}
-            sx={{
-              backgroundColor: (location.pathname === '/' || location.pathname === '/homepage') ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.2)'
-              }
-            }}
+            active={isActive('/')}
           >
             Home
-          </Button>
-          <NavButton
-            startIcon={<ListIcon />}
-            onClick={() => navigate('/backlog')}
-            active={isActive('/backlog')}
-          >
-            Backlog
           </NavButton>
+          <NavButton
+            startIcon={<CardTravelIcon />}
+            onClick={() => navigate('/trips')}
+            active={isActive('/trips')}
+          >
+            My Trips
+          </NavButton>
+          {location.pathname.includes('/trip/') && (
+            <NavButton
+              startIcon={<ListIcon />}
+              onClick={() => navigate(`${location.pathname}/backlog`)}
+              active={location.pathname.includes('/backlog')}
+            >
+              Backlog
+            </NavButton>
+          )}
           <NavButton
             startIcon={<TimelineIcon />}
             onClick={() => navigate('/timeline')}
@@ -81,6 +93,19 @@ function Navbar() {
             Timeline
           </NavButton>
         </Box>
+        {username && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography sx={{ color: 'white' }}>
+              Welcome, {username}
+            </Typography>
+            <NavButton
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+            >
+              Logout
+            </NavButton>
+          </Box>
+        )}
       </Toolbar>
     </StyledAppBar>
   );

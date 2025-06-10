@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Button, Typography } from "@mui/material";
 import Activity from "./components/Activity";
 import CustomRating from "./components/CustomRating";
@@ -11,8 +11,21 @@ import AddActivityModal from "./components/AddActivityModal";
 import TimelineView from "./components/TimelineView";
 import Homepage from "./Pages/Homepage";
 import Navbar from "./components/Navbar";
+import Trips from "./Pages/Trips";
+import TripDashboard from "./Pages/TripDashboard";
+import Login from "./Pages/Login";
+import Signup from './Pages/Signup';
 
 //Test Kommentar für Github-Actions
+
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const userId = localStorage.getItem('userId');
+  if (!userId) {
+    return <Navigate to="/login" />;
+  }
+  return children;
+};
 
 function App() {
 
@@ -259,145 +272,232 @@ function App() {
   };
 
   return (
-    <>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/homepage" element={<Homepage />} />
-        <Route path="/backlog" element={
-          <div
-            id="wrapper"
-            style={{
-              width: '100vw',
-              height: 'calc(100vh - 64px)', // Adjust for navbar height
-              backgroundColor: '#213243',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: '64px', // Add margin for navbar
-            }}
-          >
-            <DragDropContext onDragEnd={onDragEnd}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                <Droppable droppableId="backlog">
-                  {(provided) => (
-                    <div
-                      id="backlog"
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      style={{
-                        backgroundColor: '#424b64',
-                        width: '45%',
-                        height: '80%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'start',
-                        margin: '1rem',
-                        borderRadius: '10px',
-                        overflowY: 'auto',
-                        overflowX: 'hidden',
-                        padding: '1rem',
-                      }}
-                    >
-                      <h1
-                        style={{
-                          fontSize: '2rem',
-                          fontWeight: 'bold',
-                          textAlign: 'center',
-                          marginBottom: '1rem',
-                          color: 'white'
-                        }}
-                      >
-                        Backlog
-                      </h1>
-                      <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        width: '100%',
-                        marginBottom: '1rem'
-                      }}>
-                        <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
-                          {(loadError, isLoaded) => {
-                            if (loadError) return <div>Error loading maps</div>;
-                            if (!isLoaded) return <div>Loading Maps</div>;
-                            return (
-                              <div style={{ flex: 1, marginRight: '10px' }}>
-                                <MapsSearchbar insertActivity={insertActivity} />
-                              </div>
-                            );
-                          }}
-                        </LoadScript>
-                        <AddActivityModal onAdd={insertActivity} />
-                      </div>
-
-                      {activities.backlog.map((activity, index) => (
-                        <Draggable key={activity.id} draggableId={activity.id} index={index}>
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={{
-                                width: '100%',
-                                ...provided.draggableProps.style
-                              }}
-                            >
-                              <Activity
-                                id={activity.id}
-                                title={activity.title}
-                                address={activity.address}
-                                price={activity.price}
-                                tags={activity.tags}
-                                rating={activity.rating}
-                                image={activity.image}
-                                onEdit={editActivity}
-                                onDelete={deleteActivity}
-                              />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-                
+    <LoadScript googleMapsApiKey={googleMapsApiKey}>
+      <div className="App">
+        <Navbar />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Homepage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trips"
+            element={
+              <ProtectedRoute>
+                <Trips />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/trip/:id"
+            element={
+              <ProtectedRoute>
+                <TripDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/backlog" element={
+            <ProtectedRoute>
+              <DragDropContext onDragEnd={onDragEnd}>
                 <div
+                  id="wrapper"
                   style={{
-                    width: '45%',
-                    height: '80%',
-                    margin: '1rem',
+                    width: '100vw',
+                    height: 'calc(100vh - 64px)',
+                    backgroundColor: '#213243',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginTop: '64px',
                   }}
                 >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-around',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '100%',
+                    }}
+                  >
+                    <Droppable droppableId="backlog">
+                      {(provided) => (
+                        <div
+                          id="backlog"
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                          style={{
+                            backgroundColor: '#424b64',
+                            width: '45%',
+                            height: '80%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'start',
+                            margin: '1rem',
+                            borderRadius: '10px',
+                            overflowY: 'auto',
+                            overflowX: 'hidden',
+                            padding: '1rem',
+                          }}
+                        >
+                          <h1
+                            style={{
+                              fontSize: '2rem',
+                              fontWeight: 'bold',
+                              textAlign: 'center',
+                              marginBottom: '1rem',
+                              color: 'white'
+                            }}
+                          >
+                            Backlog
+                          </h1>
+                          <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            width: '100%',
+                            marginBottom: '1rem'
+                          }}>
+                            <LoadScript googleMapsApiKey={googleMapsApiKey} libraries={["places"]}>
+                              {(loadError, isLoaded) => {
+                                if (loadError) return <div>Error loading maps</div>;
+                                if (!isLoaded) return <div>Loading Maps</div>;
+                                return (
+                                  <div style={{ flex: 1, marginRight: '10px' }}>
+                                    <MapsSearchbar insertActivity={insertActivity} />
+                                  </div>
+                                );
+                              }}
+                            </LoadScript>
+                            <AddActivityModal onAdd={insertActivity} />
+                          </div>
+
+                          {activities.backlog.map((activity, index) => (
+                            <Draggable key={activity.id} draggableId={activity.id} index={index}>
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={{
+                                    width: '100%',
+                                    ...provided.draggableProps.style
+                                  }}
+                                >
+                                  <Activity
+                                    id={activity.id}
+                                    title={activity.title}
+                                    address={activity.address}
+                                    price={activity.price}
+                                    tags={activity.tags}
+                                    rating={activity.rating}
+                                    image={activity.image}
+                                    onEdit={editActivity}
+                                    onDelete={deleteActivity}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                    
+                    <div
+                      style={{
+                        width: '45%',
+                        height: '80%',
+                        margin: '1rem',
+                      }}
+                    >
+                      <TimelineView
+                        activities={activities.timeline}
+                        onDelete={deleteActivity}
+                        onEdit={editActivity}
+                        currentDay={currentDay}
+                        onDayChange={setCurrentDay}
+                        maxDays={maxDays}
+                        onAddDay={handleAddDay}
+                        onRemoveDay={handleRemoveDay}
+                        dayTitles={dayTitles}
+                        onUpdateDayTitle={handleUpdateDayTitle}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </DragDropContext>
+            </ProtectedRoute>
+          } />
+          <Route path="/trip/:tripId/backlog" element={
+            <ProtectedRoute>
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div className="container">
+                  <div className="backlog-container">
+                    <h2>Backlog</h2>
+                    <Droppable droppableId="backlog">
+                      {(provided) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className="backlog"
+                        >
+                          {activities.backlog.map((activity, index) => (
+                            <Draggable
+                              key={activity.id}
+                              draggableId={activity.id}
+                              index={index}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <Activity
+                                    key={activity.id}
+                                    id={activity.id}
+                                    title={activity.title}
+                                    address={activity.address}
+                                    price={activity.price}
+                                    tags={activity.tags}
+                                    rating={activity.rating}
+                                    image={activity.image}
+                                    onDelete={() => deleteActivity(activity.id)}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
                   <TimelineView
-                    activities={activities.timeline}
-                    onDelete={deleteActivity}
-                    onEdit={editActivity}
+                    activities={activities}
                     currentDay={currentDay}
-                    onDayChange={setCurrentDay}
+                    setCurrentDay={setCurrentDay}
                     maxDays={maxDays}
-                    onAddDay={handleAddDay}
-                    onRemoveDay={handleRemoveDay}
+                    handleAddDay={handleAddDay}
+                    handleRemoveDay={handleRemoveDay}
                     dayTitles={dayTitles}
-                    onUpdateDayTitle={handleUpdateDayTitle}
+                    handleUpdateDayTitle={handleUpdateDayTitle}
                   />
                 </div>
-              </div>
-            </DragDropContext>
-          </div>
-        } />
-      </Routes>
-    </>
+              </DragDropContext>
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </div>
+    </LoadScript>
   );
 }
 

@@ -1,0 +1,156 @@
+.dashboard-container {
+  height: 100vh;
+  background: #213243;
+}
+
+.dashboard-header {
+  padding: 1rem 2rem;
+  background: #2c3446;
+  color: white;
+  text-align: center;
+  border-bottom: 1px solid #424b64;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.trip-dates {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+.dashboard-main {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trip-description {
+  margin-bottom: 2rem;
+}
+
+.trip-description h2 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.trip-description p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.trip-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.stat-card h3 {
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.dashboard-sidebar {
+  position: sticky;
+  top: 2rem;
+}
+
+.action-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.action-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.action-button:hover {
+  background-color: #0056b3;
+}
+
+.action-button:last-child {
+  margin-bottom: 0;
+  background-color: #6c757d;
+}
+
+.action-button:last-child:hover {
+  background-color: #5a6268;
+}
+
+.loading {
+  text-align: center;
+  color: #ccc;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
+
+.error-message {
+  background-color: #fff3f3;
+  color: #dc3545;
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 2rem auto;
+  max-width: 600px;
+  text-align: center;
+  border: 1px solid #dc3545;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-sidebar {
+    position: static;
+  }
+} 

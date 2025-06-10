@@ -1,7 +1,7 @@
 import './Homepage.css';
 import { useState, useEffect } from 'react';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -35,54 +35,80 @@ const DayTitle = styled(Box)(({ theme }) => ({
   gap: theme.spacing(1)
 }));
 
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+  minHeight: '400px'
+};
+
+const defaultCenter = {
+  lat: 35.6762,
+  lng: 139.6503
+};
+
+const mapOptions = {
+  styles: [
+    {
+      featureType: "all",
+      elementType: "all",
+      stylers: [{ color: "#2c3446" }]
+    }
+  ],
+  disableDefaultUI: true,
+  zoomControl: true
+};
+
 function Homepage() {
-  const navigate = useNavigate();
+  const { id: tripId } = useParams();
+  const [mapError, setMapError] = useState(null);
+  
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_Map_Api_Key,
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries: ["places"]
   });
+
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [currentDay, setCurrentDay] = useState(0);
   const [activities, setActivities] = useState({ backlog: [], timeline: [] });
   const [dayTitles, setDayTitles] = useState({});
   const [maxDays, setMaxDays] = useState(7);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Force reload when component mounts
   useEffect(() => {
-    const savedActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
-    const savedDayTitles = JSON.parse(localStorage.getItem('dayTitles')) || {};
-    setActivities(savedActivities);
-    setDayTitles(savedDayTitles);
-    
-    // Calculate max days based on activities
-    const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
-    setMaxDays(Math.max(maxDay + 1, 7));
-  }, [navigate]); // This will run every time we navigate to the homepage
+    if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
+      setMapError('Google Maps API key is missing. Please add it to your .env file.');
+    }
+    fetchActivities();
+  }, [tripId]);
 
-  // Listen for changes in localStorage
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedActivities = JSON.parse(localStorage.getItem('activities')) || { backlog: [], timeline: [] };
-      const savedDayTitles = JSON.parse(localStorage.getItem('dayTitles')) || {};
-      setActivities(savedActivities);
-      setDayTitles(savedDayTitles);
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/activities`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch activities');
+      }
+      const data = await response.json();
+      
+      // Transform the data into the format expected by the component
+      const transformedData = {
+        backlog: data.filter(a => a.status === 'backlog'),
+        timeline: data.filter(a => a.status === 'timeline')
+      };
+      
+      setActivities(transformedData);
       
       // Calculate max days based on activities
-      const maxDay = Math.max(...savedActivities.timeline.map(a => a.day || 0), 0);
+      const maxDay = Math.max(...transformedData.timeline.map(a => a.day || 0), 0);
       setMaxDays(Math.max(maxDay + 1, 7));
-    };
-
-    // Set up interval to check for changes
-    const intervalId = setInterval(handleStorageChange, 1000);
-
-    // Also listen for storage events (for cross-tab updates)
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(intervalId);
-    };
-  }, []);
+      
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+      setError('Failed to load activities');
+      setLoading(false);
+    }
+  };
 
   const handleNextDay = () => {
     if (currentDay < maxDays - 1) {
@@ -96,9 +122,39 @@ function Homepage() {
     }
   };
 
-  // Filter activities for current day
   const dayActivities = activities.timeline.filter(activity => activity.day === currentDay);
   const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
+
+  const handleMapLoad = (map) => {
+    try {
+      // Add any map initialization logic here
+      console.log('Map loaded successfully');
+    } catch (error) {
+      console.error('Error loading map:', error);
+      setMapError('Failed to load map');
+    }
+  };
+
+  const handleMapError = (error) => {
+    console.error('Map error:', error);
+    setMapError('An error occurred while loading the map');
+  };
+
+  if (loading) {
+    return (
+      <div className="layout">
+        <div className="loading">Loading activities...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="layout">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="layout">
@@ -152,7 +208,7 @@ function Homepage() {
               price={activity.price}
               tags={activity.tags}
               rating={activity.rating}
-              image={activity.image}
+              image={activity.image_url}
               selected={selectedIdx === activity.id}
               onClick={() => setSelectedIdx(activity.id)}
             />
@@ -175,7 +231,21 @@ function Homepage() {
           </div>
         </div>
         <div className="mapPanel">
-          {loadError ? (
+          {mapError ? (
+            <div style={{ 
+              width: '100%', 
+              height: '100%', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: 'white',
+              backgroundColor: '#2c3446',
+              padding: '20px',
+              textAlign: 'center'
+            }}>
+              {mapError}
+            </div>
+          ) : loadError ? (
             <div style={{ 
               width: '100%', 
               height: '100%', 
@@ -201,23 +271,20 @@ function Homepage() {
             </div>
           ) : (
             <GoogleMap
-              mapContainerClassName="mapContainer"
-              center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : { lat: 35.6762, lng: 139.6503 }}
+              mapContainerStyle={mapContainerStyle}
+              center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : defaultCenter}
               zoom={12}
-              options={{
-                styles: [
-                  {
-                    featureType: "all",
-                    elementType: "all",
-                    stylers: [{ color: "#2c3446" }]
-                  }
-                ]
-              }}
+              options={mapOptions}
+              onLoad={handleMapLoad}
+              onError={handleMapError}
             >
               {activities.timeline.map((activity) => (
                 <Marker
                   key={activity.id}
-                  position={activity.position}
+                  position={{ 
+                    lat: activity.position_lat || defaultCenter.lat, 
+                    lng: activity.position_lng || defaultCenter.lng 
+                  }}
                   onClick={() => setSelectedIdx(activity.id)}
                 />
               ))}

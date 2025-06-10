@@ -13,10 +13,12 @@ const ActivityCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(0.5),
   margin: theme.spacing(1),
   borderRadius: theme.spacing(2),
-  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-  minHeight: 120, // Feste Mindesthoehe
+  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+  minHeight: 120,
   flexShrink: 0,
   width: "95%",
+  background: 'white',
+  color: '#213243',
 }));
 
 const Thumbnail = styled('img')({
@@ -35,8 +37,8 @@ const PriceBadge = styled(Chip)({
 });
 
 const TagChip = styled(Chip)({
-  backgroundColor: '#c2dff0',
-  color: 'black',
+  backgroundColor: '#e8e8e8',
+  color: '#213243',
   fontWeight: 'bold',
   marginRight: '5px',
 });
@@ -47,166 +49,172 @@ const ModalStyle = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor: 'white',
   border: '2px solid #00000000',
   boxShadow: 24,
   p: 4,
-  borderRadius: "10px"
+  borderRadius: "10px",
+  color: '#213243',
 };
 
 const textFieldStyle = {
   fullWidth: true,
   margin: 'normal',
+  '& .MuiInputBase-root': {
+    color: '#213243',
+  },
+  '& .MuiInputLabel-root': {
+    color: '#666',
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#e0e0e0',
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#d8a9f0',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#d8a9f0',
+  },
 };
 
 const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete }) => {
-  const [activityData, setActivityData] = useState({id,  title, address, price, tags, rating, image });
+  const [activityData, setActivityData] = useState({ id, title, address, price, tags, rating, image });
   const [open, setOpen] = useState(false);
-  const [inputValues, setInputValues] = useState({ title, address, price, tags: tags.join(', '), rating, image });
+  const [inputValues, setInputValues] = useState({ 
+    title, 
+    address, 
+    price, 
+    tags: Array.isArray(tags) ? tags.join(', ') : '', 
+    rating, 
+    image 
+  });
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
-    setInputValues({ ...inputValues, [name]: value });
+    setInputValues(prev => ({ ...prev, [name]: value }));
   };
 
   const updateActivity = () => {
-    //console.log("updateActivity was valled"); 
-    setActivityData({
+    const updatedActivity = {
       ...inputValues,
-      tags: inputValues.tags.split(',').map(tag => tag.trim())
-    });
+      tags: inputValues.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+    };
 
-    onEdit(id, {
-      ...inputValues,
-      tags: inputValues.tags.split(',').map(tag => tag.trim())
-    });
+    setActivityData(updatedActivity);
+    onEdit(id, updatedActivity);
     handleClose();
   };
 
-  function deleteActivity(id) {
-    //console.log("deleteActivity was called" + id);
-    onDelete(id);
-  }
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this activity?')) {
+      onDelete(id);
+    }
+  };
 
   return (
     <ActivityCard>
       <CardContent sx={{ flex: 1 }}>
-        {/* Title */}
-        <Typography variant="h6"
-        component="div"
-        gutterBottom>
+        <Typography variant="h6" component="div" gutterBottom sx={{ color: '#213243' }}>
           {activityData.title}
         </Typography>
 
-        {/* Address */}
-        <Typography
-        variant="body2"
-        color="textSecondary">
+        <Typography variant="body2" sx={{ color: '#666' }}>
           {activityData.address}
         </Typography>
 
-        {/* Price and Tags */}
-        <Box sx={{ display: 'flex',
-          alignItems: 'center',
-          mt: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, flexWrap: 'wrap', gap: 1 }}>
+          <PriceBadge label={`${activityData.price} €`} />
 
-          <PriceBadge
-          label={`${activityData.price} €`} />
-
-          {activityData.tags.map((tag) => (
-            <TagChip
-            key={tag}
-            label={tag} />
+          {Array.isArray(activityData.tags) && activityData.tags.map((tag) => (
+            <TagChip key={tag} label={tag} />
           ))}
 
-          {/* Rating */}
-          <Rating
-          value={activityData.rating}
-          precision="0.5"
-          readOnly
-          size="small" />
+          <Rating value={activityData.rating} precision="0.5" readOnly size="small" />
 
-          {/* Edit Button and Edit Modal*/}
-          <div>
-            <IconButton
-            onClick={handleOpen}>
-              <EditIcon/>
+          <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+            <IconButton onClick={handleOpen} size="small" sx={{ color: '#213243' }}>
+              <EditIcon />
             </IconButton>
-            <IconButton
-            onClick={() => deleteActivity(activityData.id)}>
-              <DeleteIcon/>
+            <IconButton onClick={handleDelete} size="small" sx={{ color: '#213243' }}>
+              <DeleteIcon />
             </IconButton>
+          </Box>
 
-            <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Box sx={ModalStyle}>
-                <Typography
-                id="modal-modal-title"
-                variant="h6"
-                component="h2"
-                style={{color:"gray"}}>
-                  Edit Activity
-                </Typography>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={ModalStyle}>
+              <Typography id="modal-modal-title" variant="h6" component="h2" style={{ color: "gray" }}>
+                Edit Activity
+              </Typography>
 
-                <Box
-                component="form"
-                noValidate
-                autoComplete="off">
-
-                  <CustomTextField
-                    label="Title"
-                    name="title"
-                    value={inputValues.title}
-                    onChange={handleInputChange}
-                  />
-                  <CustomTextField
-                    label="Address"
-                    name="address"
-                    value={inputValues.address}
-                    onChange={handleInputChange}
-                  />
-                  <CustomTextField
-                    label="Price"
-                    name="price"
-                    value={inputValues.price}
-                    onChange={handleInputChange}
-                  />
-                  <CustomTextField
-                    label="Tags (comma separated -> Tag1, Tag2)"
-                    name="tags"
-                    value={inputValues.tags}
-                    onChange={handleInputChange}
-                  />
-                  <CustomTextField
-                    label="Image Link"
-                    name="image"
-                    value={inputValues.image}
-                    onChange={handleInputChange}
-                  />
+              <Box component="form" noValidate autoComplete="off">
+                <CustomTextField
+                  label="Title"
+                  name="title"
+                  value={inputValues.title}
+                  onChange={handleInputChange}
+                  required
+                />
+                <CustomTextField
+                  label="Address"
+                  name="address"
+                  value={inputValues.address}
+                  onChange={handleInputChange}
+                  required
+                />
+                <CustomTextField
+                  label="Price"
+                  name="price"
+                  value={inputValues.price}
+                  onChange={handleInputChange}
+                  type="number"
+                  required
+                />
+                <CustomTextField
+                  label="Tags (comma separated -> Tag1, Tag2)"
+                  name="tags"
+                  value={inputValues.tags}
+                  onChange={handleInputChange}
+                  helperText="Enter tags separated by commas"
+                />
+                <CustomTextField
+                  label="Image Link"
+                  name="image"
+                  value={inputValues.image}
+                  onChange={handleInputChange}
+                />
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
                   <Button
-                  onClick={updateActivity}
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  margin="normal">
+                    onClick={handleClose}
+                    variant="outlined"
+                    fullWidth
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={updateActivity}
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                  >
                     Update Activity
                   </Button>
                 </Box>
               </Box>
-            </Modal>
-          </div>
+            </Box>
+          </Modal>
         </Box>
       </CardContent>
-      <Thumbnail
-      src={activityData.image}
-      alt={activityData.title} />
+      {activityData.image && (
+        <Thumbnail src={activityData.image} alt={activityData.title} />
+      )}
     </ActivityCard>
   );
 };

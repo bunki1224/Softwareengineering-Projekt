@@ -15,6 +15,8 @@ import Trips from "./Pages/Trips";
 import TripDashboard from "./Pages/TripDashboard";
 import Login from "./Pages/Login";
 import Signup from './Pages/Signup';
+import Backlog from './Pages/Backlog';
+import './App.css';
 
 //Test Kommentar für Github-Actions
 
@@ -493,6 +495,11 @@ function App() {
                   />
                 </div>
               </DragDropContext>
+            </ProtectedRoute>
+          } />
+          <Route path="/trips/:id/backlog" element={
+            <ProtectedRoute>
+              <Backlog />
             </ProtectedRoute>
           } />
         </Routes>

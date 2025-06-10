@@ -16,7 +16,8 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:3000/signup', {
+      console.log('Attempting signup...');
+      const response = await fetch('http://localhost:3000/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +26,9 @@ const Signup = () => {
         credentials: 'include'
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Signup failed');
@@ -36,9 +39,11 @@ const Signup = () => {
       localStorage.setItem('username', data.username);
       localStorage.setItem('email', data.email);
       
+      console.log('Signup successful, redirecting...');
       // Redirect to trips page
       navigate('/trips');
     } catch (error) {
+      console.error('Signup error:', error);
       setError(error.message || 'Failed to create account. Please try again.');
     } finally {
       setLoading(false);

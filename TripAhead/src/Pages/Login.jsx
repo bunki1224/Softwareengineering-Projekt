@@ -15,7 +15,7 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log('Attempting login...');
+      console.log('Attempting login with:', { username });
       const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: {

@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import '../styles/Backlog.css';
+import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 
 const TimelineHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -47,7 +48,7 @@ const Backlog = () => {
   const navigate = useNavigate();
   const [activities, setActivities] = useState({ backlog: [], timeline: [] });
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [autocomplete, setAutocomplete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [openModal, setOpenModal] = useState(false);
@@ -64,7 +65,17 @@ const Backlog = () => {
   const [totalDays, setTotalDays] = useState(1);
   const [dayTitles, setDayTitles] = useState({});
 
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: googleMapsApiKey,
+    libraries: ["places"]
+  });
+
   useEffect(() => {
+    if (!googleMapsApiKey) {
+      setError('Google Maps API key is missing. Please add it to your .env file.');
+    }
     if (!tripId) {
       setError('No trip ID provided');
       setLoading(false);
@@ -178,24 +189,28 @@ const Backlog = () => {
     }
   };
 
-  const handleSearch = async (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
+  const onLoad = (autoC) => setAutocomplete(autoC);
 
-    if (query.length < 2) {
-      setSearchResults([]);
-      return;
-    }
+  const onPlaceChanged = () => {
+    if (autocomplete) {
+      const place = autocomplete.getPlace();
+      
+      if (place.geometry) {
+        const activity = {
+          title: place.name || 'Unnamed Place',
+          description: place.formatted_address || '',
+          address: place.formatted_address || '',
+          price: 0,
+          tags: ['Sightseeing'],
+          rating: place.rating ? Math.round(place.rating) : 0,
+          image_url: place.photos && place.photos[0] ? place.photos[0].getUrl() : 'https://source.unsplash.com/random/300x200',
+          position_lat: place.geometry.location.lat(),
+          position_lng: place.geometry.location.lng()
+        };
 
-    try {
-      const response = await fetch(`http://localhost:3000/activities/search?query=${encodeURIComponent(query)}`);
-      if (!response.ok) {
-        throw new Error('Failed to search activities');
+        handleAddActivity(activity);
+        setSearchQuery('');
       }
-      const data = await response.json();
-      setSearchResults(data);
-    } catch (error) {
-      console.error('Error searching activities:', error);
     }
   };
 
@@ -219,7 +234,6 @@ const Backlog = () => {
 
       await fetchActivities();
       setSearchQuery('');
-      setSearchResults([]);
     } catch (error) {
       console.error('Error adding activity:', error);
       setError('Failed to add activity');
@@ -568,13 +582,23 @@ const Backlog = () => {
         <div className="backlog-layout">
           <div className="backlog-sidebar">
             <div className="search-section">
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search for activities..."
-                value={searchQuery}
-                onChange={handleSearch}
-              />
+              {error ? (
+                <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>
+              ) : loadError ? (
+                <div style={{ color: 'red' }}>Error loading maps: {loadError.message}</div>
+              ) : !isLoaded ? (
+                <div>Loading Maps...</div>
+              ) : (
+                <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search for places..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </Autocomplete>
+              )}
               <Button
                 variant="contained"
                 color="primary"
@@ -585,16 +609,6 @@ const Backlog = () => {
                 Add
               </Button>
             </div>
-            {searchResults.length > 0 && (
-              <div className="search-results">
-                {searchResults.map(activity => (
-                  <div key={activity.id} className="search-result-item" onClick={() => handleAddActivity(activity)}>
-                    <h3>{activity.title}</h3>
-                    <p>{activity.description}</p>
-                  </div>
-                ))}
-              </div>
-            )}
             <div className="backlog-list">
               <h2>Backlog</h2>
               <Droppable droppableId="backlog">

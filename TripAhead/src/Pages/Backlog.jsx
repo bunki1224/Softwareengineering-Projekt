@@ -106,20 +106,28 @@ const Backlog = () => {
       const data = await response.json();
       console.log('Received activities:', data);
       
+      // Ensure all activities have string IDs
+      const processedData = data.map(activity => ({
+        ...activity,
+        id: String(activity.id)
+      }));
+      
       const transformedData = {
-        backlog: data.filter(a => a.status === 'backlog'),
-        timeline: data.filter(a => a.status === 'timeline')
+        backlog: processedData.filter(a => a.status === 'backlog'),
+        timeline: processedData.filter(a => a.status === 'timeline')
       };
       
       setActivities(transformedData);
       
+      // Update total days based on the highest day number in timeline activities
       const maxDay = Math.max(...transformedData.timeline.map(a => a.day || 0), 0);
-      const newDays = Array.from({ length: Math.max(maxDay + 1, 1) }, (_, i) => ({
-        id: `day${i + 1}`,
-        title: `Day ${i + 1}`
-      }));
-      setTotalDays(maxDay + 1);
-      setCurrentDay(1);
+      const newTotalDays = Math.max(maxDay, 1);
+      setTotalDays(newTotalDays);
+      
+      // Ensure current day is valid
+      if (currentDay > newTotalDays) {
+        setCurrentDay(newTotalDays);
+      }
       
       setLoading(false);
     } catch (error) {
@@ -213,9 +221,19 @@ const Backlog = () => {
     }
   };
 
-  const handleAddDay = () => {
-    setTotalDays(prev => prev + 1);
-    setCurrentDay(prev => prev + 1);
+  const handleAddDay = async () => {
+    try {
+      const newDay = totalDays + 1;
+      setTotalDays(newDay);
+      setCurrentDay(newDay);
+      
+      // No need to update existing activities since they already have their day values
+      // Just fetch the latest state from the database
+      await fetchActivities();
+    } catch (error) {
+      console.error('Error adding day:', error);
+      setError('Failed to add day');
+    }
   };
 
   const handlePreviousDay = () => {
@@ -279,19 +297,25 @@ const Backlog = () => {
 
     console.log('Drag end:', { sourceList, destList, draggableId });
 
-    // Optimistically update the UI
-    const sourceItems = [...activities[sourceList === 'backlog' ? 'backlog' : 'timeline']];
-    const [removed] = sourceItems.splice(source.index, 1);
-    const destItems = sourceList === destList ? sourceItems : [...activities[destList === 'backlog' ? 'backlog' : 'timeline']];
-    destItems.splice(destination.index, 0, removed);
-
-    setActivities({
-      ...activities,
-      [sourceList === 'backlog' ? 'backlog' : 'timeline']: sourceItems,
-      [destList === 'backlog' ? 'backlog' : 'timeline']: destItems,
-    });
+    // Store the original state in case we need to revert
+    const originalActivities = { ...activities };
 
     try {
+      // Optimistically update the UI
+      const sourceItems = [...activities[sourceList]];
+      const [removed] = sourceItems.splice(source.index, 1);
+      const destItems = sourceList === destList ? sourceItems : [...activities[destList]];
+      destItems.splice(destination.index, 0, removed);
+
+      const newActivities = {
+        ...activities,
+        [sourceList]: sourceItems,
+        [destList]: destItems,
+      };
+
+      setActivities(newActivities);
+
+      // Make the API call
       const response = await fetch(`http://localhost:3000/trips/${tripId}/activities/${draggableId}`, {
         method: 'PATCH',
         headers: {
@@ -304,14 +328,16 @@ const Backlog = () => {
       });
 
       if (!response.ok) {
+        // Revert to original state if the API call fails
+        setActivities(originalActivities);
         throw new Error('Failed to update activity');
       }
 
+      // Refresh the activities to ensure consistency
       await fetchActivities();
     } catch (error) {
       console.error('Error updating activity:', error);
       setError('Failed to update activity');
-      await fetchActivities();
     }
   };
 
@@ -364,26 +390,30 @@ const Backlog = () => {
                 ))}
               </div>
             )}
-            <Droppable droppableId="backlog">
-              {(provided) => (
-                <div
-                  className="backlog-list"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <h2>Backlog</h2>
-                  <div className="activity-list">
+            <div className="backlog-list">
+              <h2>Backlog</h2>
+              <Droppable droppableId="backlog">
+                {(provided) => (
+                  <div
+                    className="activity-list"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {activities.backlog.map((activity, index) => (
                       <Draggable
-                        key={activity.id}
-                        draggableId={activity.id.toString()}
+                        key={String(activity.id)}
+                        draggableId={String(activity.id)}
                         index={index}
                       >
-                        {(provided) => (
+                        {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
+                            style={{
+                              ...provided.draggableProps.style,
+                              opacity: snapshot.isDragging ? 0.8 : 1,
+                            }}
                           >
                             <Activity
                               id={activity.id}
@@ -402,9 +432,9 @@ const Backlog = () => {
                     ))}
                     {provided.placeholder}
                   </div>
-                </div>
-              )}
-            </Droppable>
+                )}
+              </Droppable>
+            </div>
           </div>
 
           <div className="timeline-section">
@@ -437,27 +467,31 @@ const Backlog = () => {
                 Add Day
               </Button>
             </div>
-            <Droppable droppableId={`day${currentDay}`}>
-              {(provided) => (
-                <div
-                  className="day-list"
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <div className="activity-list">
+            <div className="day-list">
+              <Droppable droppableId="timeline">
+                {(provided) => (
+                  <div
+                    className="activity-list"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {activities.timeline
                       .filter(activity => activity.day === currentDay)
                       .map((activity, index) => (
                         <Draggable
-                          key={activity.id}
-                          draggableId={activity.id.toString()}
+                          key={String(activity.id)}
+                          draggableId={String(activity.id)}
                           index={index}
                         >
-                          {(provided) => (
+                          {(provided, snapshot) => (
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
                               {...provided.dragHandleProps}
+                              style={{
+                                ...provided.draggableProps.style,
+                                opacity: snapshot.isDragging ? 0.8 : 1,
+                              }}
                             >
                               <Activity
                                 id={activity.id}
@@ -476,9 +510,9 @@ const Backlog = () => {
                       ))}
                     {provided.placeholder}
                   </div>
-                </div>
-              )}
-            </Droppable>
+                )}
+              </Droppable>
+            </div>
           </div>
         </div>
 

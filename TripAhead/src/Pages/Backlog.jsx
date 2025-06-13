@@ -245,7 +245,12 @@ const Backlog = () => {
         throw new Error('Failed to create activity');
       }
 
-      await fetchActivities();
+      // Refresh both activities and days data
+      await Promise.all([
+        fetchActivities(),
+        fetchDays()
+      ]);
+
       setOpenModal(false);
       setNewActivity({
         title: '',
@@ -470,6 +475,53 @@ const Backlog = () => {
     }
   };
 
+  const handleMoveToDay = async (activityId, day) => {
+    try {
+      console.log('Moving activity to day:', { activityId, day });
+      
+      // First, ensure the day exists
+      const dayResponse = await fetch(`http://localhost:3000/trips/${tripId}/days`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          day_number: day,
+          title: `Day ${day}`
+        }),
+      });
+
+      if (!dayResponse.ok) {
+        const errorData = await dayResponse.json();
+        throw new Error(errorData.error || 'Failed to create day');
+      }
+
+      // Then update the activity
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/activities/${activityId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'timeline',
+          day: day,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update activity');
+      }
+
+      // Refresh the activities to ensure consistency
+      await fetchActivities();
+      await fetchDays(); // Also refresh days to ensure we have the latest data
+    } catch (error) {
+      console.error('Error updating activity:', error);
+      setError(error.message || 'Failed to update activity');
+    }
+  };
+
   if (loading) {
     return (
       <div className="backlog-container">
@@ -554,6 +606,8 @@ const Backlog = () => {
                               image={activity.image_url}
                               onEdit={handleEditActivity}
                               onDelete={handleDeleteActivity}
+                              onMoveToDay={handleMoveToDay}
+                              totalDays={totalDays}
                             />
                           </div>
                         )}

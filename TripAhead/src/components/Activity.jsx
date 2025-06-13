@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Chip, Box, Rating, Button, IconButton, Modal, TextField } from '@mui/material';
+import { Card, CardContent, Typography, Chip, Box, Rating, Button, IconButton, Modal, TextField, Menu, MenuItem } from '@mui/material';
 import { border, borderRadius, color, styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 
 import CustomTextField from "./CustomTextField";
 
@@ -77,9 +78,10 @@ const textFieldStyle = {
   },
 };
 
-const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete }) => {
+const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete, onMoveToDay, totalDays }) => {
   const [activityData, setActivityData] = useState({ id, title, address, price, tags, rating, image });
   const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const [inputValues, setInputValues] = useState({ 
     title, 
     address, 
@@ -91,6 +93,19 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const handleMoveClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMoveClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMoveToDay = (day) => {
+    onMoveToDay(id, day);
+    handleMoveClose();
+  };
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -135,6 +150,9 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
           <Rating value={activityData.rating} precision="0.5" readOnly size="small" />
 
           <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+            <IconButton onClick={handleMoveClick} size="small" sx={{ color: '#213243' }}>
+              <MoveToInboxIcon />
+            </IconButton>
             <IconButton onClick={handleOpen} size="small" sx={{ color: '#213243' }}>
               <EditIcon />
             </IconButton>
@@ -142,6 +160,18 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
               <DeleteIcon />
             </IconButton>
           </Box>
+
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMoveClose}
+          >
+            {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => (
+              <MenuItem key={day} onClick={() => handleMoveToDay(day)}>
+                Move to Day {day}
+              </MenuItem>
+            ))}
+          </Menu>
 
           <Modal
             open={open}

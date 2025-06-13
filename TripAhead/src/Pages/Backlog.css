@@ -1,0 +1,62 @@
+.activity-item {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.activity-content {
+  margin-bottom: 12px;
+}
+
+.activity-content h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.activity-content p {
+  margin: 0 0 8px 0;
+  color: #666;
+}
+
+.activity-details {
+  display: flex;
+  gap: 16px;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
+.activity-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.move-button {
+  background-color: #4CAF50 !important;
+  color: white !important;
+}
+
+.move-button:hover {
+  background-color: #45a049 !important;
+}
+
+.activity-actions button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+.activity-actions button:last-child:hover {
+  background-color: #da190b;
+} 

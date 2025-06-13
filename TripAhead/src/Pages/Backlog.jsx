@@ -62,6 +62,7 @@ const Backlog = () => {
   });
   const [currentDay, setCurrentDay] = useState(1);
   const [totalDays, setTotalDays] = useState(1);
+  const [dayTitles, setDayTitles] = useState({});
 
   useEffect(() => {
     if (!tripId) {
@@ -69,7 +70,21 @@ const Backlog = () => {
       setLoading(false);
       return;
     }
-    checkTripAndFetchActivities();
+    
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await checkTripAndFetchActivities();
+        await fetchDays();
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, [tripId]);
 
   const checkTripAndFetchActivities = async () => {
@@ -134,6 +149,32 @@ const Backlog = () => {
       console.error('Error fetching activities:', error);
       setError('Failed to load activities');
       setLoading(false);
+    }
+  };
+
+  const fetchDays = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/days`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch days');
+      }
+      const days = await response.json();
+      
+      // Convert days array to title map
+      const titles = {};
+      days.forEach(day => {
+        titles[day.day_number] = day.title;
+      });
+      setDayTitles(titles);
+      
+      // Update total days
+      if (days.length > 0) {
+        const maxDay = Math.max(...days.map(d => d.day_number));
+        setTotalDays(maxDay);
+      }
+    } catch (error) {
+      console.error('Error fetching days:', error);
+      setError('Failed to load days');
     }
   };
 
@@ -224,15 +265,103 @@ const Backlog = () => {
   const handleAddDay = async () => {
     try {
       const newDay = totalDays + 1;
+      
+      // Create the new day in the database
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/days`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          day_number: newDay,
+          title: `Day ${newDay}`
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add day');
+      }
+
+      const newDayData = await response.json();
+      
+      // Update local state with the new day
+      setDayTitles(prev => ({
+        ...prev,
+        [newDayData.day_number]: newDayData.title
+      }));
+      
       setTotalDays(newDay);
       setCurrentDay(newDay);
       
-      // No need to update existing activities since they already have their day values
-      // Just fetch the latest state from the database
-      await fetchActivities();
+      // Refresh days to ensure we have the latest data
+      await fetchDays();
     } catch (error) {
       console.error('Error adding day:', error);
       setError('Failed to add day');
+    }
+  };
+
+  const handleRemoveDay = async (dayToRemove) => {
+    try {
+      // Delete the day from the database
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/days/${dayToRemove}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove day');
+      }
+
+      // Update local state
+      const newDayTitles = { ...dayTitles };
+      delete newDayTitles[dayToRemove];
+      
+      // Shift remaining titles down
+      Object.keys(newDayTitles).forEach(day => {
+        const dayNum = parseInt(day);
+        if (dayNum > dayToRemove) {
+          newDayTitles[dayNum - 1] = newDayTitles[dayNum];
+          delete newDayTitles[dayNum];
+        }
+      });
+      
+      setDayTitles(newDayTitles);
+      setTotalDays(prev => prev - 1);
+      
+      // If we're removing the current day, switch to the previous day
+      if (currentDay === dayToRemove) {
+        setCurrentDay(prev => prev - 1);
+      }
+      
+      // Refresh activities to get updated day numbers
+      await fetchActivities();
+    } catch (error) {
+      console.error('Error removing day:', error);
+      setError('Failed to remove day');
+    }
+  };
+
+  const handleUpdateDayTitle = async (day, title) => {
+    try {
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/days/${day}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ title }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update day title');
+      }
+
+      setDayTitles(prev => ({
+        ...prev,
+        [day]: title
+      }));
+    } catch (error) {
+      console.error('Error updating day title:', error);
+      setError('Failed to update day title');
     }
   };
 
@@ -448,7 +577,7 @@ const Backlog = () => {
                   <ArrowBackIosNewIcon />
                 </IconButton>
                 <Typography variant="h6" sx={{ color: 'white', mx: 2 }}>
-                  Day {currentDay}
+                  {dayTitles[currentDay] || `Day ${currentDay}`}
                 </Typography>
                 <IconButton 
                   onClick={handleNextDay}

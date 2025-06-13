@@ -923,4 +923,141 @@ app.get('/trips/:tripId', async (req, res) => {
   }
 });
 
+// Get days for a trip
+app.get('/trips/:tripId/days', async (req, res) => {
+  const { tripId } = req.params;
+  try {
+    const days = await pool.query(
+      'SELECT * FROM trip_days WHERE trip_id = ? ORDER BY day_number',
+      [tripId]
+    );
+    
+    // Convert BigInt to Number
+    const formattedDays = days.map(day => ({
+      ...day,
+      id: Number(day.id),
+      trip_id: Number(day.trip_id),
+      day_number: Number(day.day_number)
+    }));
+    
+    res.json(formattedDays);
+  } catch (err) {
+    console.error('Error fetching trip days:', err);
+    res.status(500).json({ error: 'Failed to fetch trip days' });
+  }
+});
+
+// Add a new day to a trip
+app.post('/trips/:tripId/days', async (req, res) => {
+  const { tripId } = req.params;
+  const { day_number, title } = req.body;
+
+  try {
+    // First check if the day already exists
+    const existingDay = await pool.query(
+      'SELECT * FROM trip_days WHERE trip_id = ? AND day_number = ?',
+      [tripId, day_number]
+    );
+
+    let result;
+    if (existingDay.length > 0) {
+      // Update existing day
+      result = await pool.query(
+        'UPDATE trip_days SET title = ? WHERE trip_id = ? AND day_number = ?',
+        [title || `Day ${day_number}`, tripId, day_number]
+      );
+    } else {
+      // Insert new day
+      result = await pool.query(
+        'INSERT INTO trip_days (trip_id, day_number, title) VALUES (?, ?, ?)',
+        [tripId, day_number, title || `Day ${day_number}`]
+      );
+    }
+
+    // Fetch the day to return
+    const days = await pool.query(
+      'SELECT * FROM trip_days WHERE trip_id = ? AND day_number = ?',
+      [tripId, day_number]
+    );
+
+    if (!days || days.length === 0) {
+      throw new Error('Failed to retrieve created/updated day');
+    }
+
+    const day = {
+      id: Number(days[0].id),
+      trip_id: Number(tripId),
+      day_number: Number(day_number),
+      title: days[0].title
+    };
+
+    res.status(201).json(day);
+  } catch (err) {
+    console.error('Error adding/updating trip day:', err);
+    res.status(500).json({ error: 'Failed to add/update trip day' });
+  }
+});
+
+// Update a day's title
+app.put('/trips/:tripId/days/:dayNumber', async (req, res) => {
+  const { tripId, dayNumber } = req.params;
+  const { title } = req.body;
+
+  try {
+    const result = await pool.query(
+      'UPDATE trip_days SET title = ? WHERE trip_id = ? AND day_number = ?',
+      [title, tripId, dayNumber]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Day not found' });
+    }
+
+    res.json({ message: 'Day updated successfully' });
+  } catch (err) {
+    console.error('Error updating trip day:', err);
+    res.status(500).json({ error: 'Failed to update trip day' });
+  }
+});
+
+// Delete a day
+app.delete('/trips/:tripId/days/:dayNumber', async (req, res) => {
+  const { tripId, dayNumber } = req.params;
+
+  try {
+    // First, move all activities from this day back to backlog
+    await pool.query(
+      'UPDATE trip_activities SET status = "backlog", day = NULL WHERE trip_id = ? AND day = ?',
+      [tripId, dayNumber]
+    );
+
+    // Then delete the day
+    const result = await pool.query(
+      'DELETE FROM trip_days WHERE trip_id = ? AND day_number = ?',
+      [tripId, dayNumber]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Day not found' });
+    }
+
+    // Update day numbers for remaining days
+    await pool.query(
+      'UPDATE trip_days SET day_number = day_number - 1 WHERE trip_id = ? AND day_number > ?',
+      [tripId, dayNumber]
+    );
+
+    // Update day numbers for activities
+    await pool.query(
+      'UPDATE trip_activities SET day = day - 1 WHERE trip_id = ? AND day > ?',
+      [tripId, dayNumber]
+    );
+
+    res.json({ message: 'Day deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting trip day:', err);
+    res.status(500).json({ error: 'Failed to delete trip day' });
+  }
+});
+
 module.exports = { app, pool };

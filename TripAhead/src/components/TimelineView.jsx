@@ -129,39 +129,30 @@ const TimelineView = ({
 
   // Only show activities for the current day
   const dayActivities = activities.filter(activity => activity.day === currentDay);
-  const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
 
   return (
     <TimelineContainer>
       <TimelineHeader>
+        <DayTitle onClick={handleEditTitle}>
+          <Typography variant="h6" sx={{ color: 'white' }}>
+            {dayTitles[currentDay] || `Day ${currentDay + 1}`}
+          </Typography>
+          <EditIconButton className="edit-icon">
+            <EditIcon fontSize="small" />
+          </EditIconButton>
+        </DayTitle>
         <HeaderControls>
-          <IconButton
+          <IconButton 
             onClick={handlePreviousDay}
             disabled={currentDay === 0}
-            sx={{
-              color: 'white',
-              '&:hover': { color: '#4CAF50' },
-              '&.Mui-disabled': { color: '#666' }
-            }}
+            sx={{ color: 'white' }}
           >
             <NavigateBeforeIcon />
           </IconButton>
-          <DayTitle onClick={handleEditTitle}>
-            <Typography variant="h6" sx={{ color: 'white' }}>
-              {currentDayTitle}
-            </Typography>
-            <EditIconButton className="edit-icon">
-              <EditIcon fontSize="small" />
-            </EditIconButton>
-          </DayTitle>
-          <IconButton
+          <IconButton 
             onClick={handleNextDay}
             disabled={currentDay === maxDays - 1}
-            sx={{
-              color: 'white',
-              '&:hover': { color: '#4CAF50' },
-              '&.Mui-disabled': { color: '#666' }
-            }}
+            sx={{ color: 'white' }}
           >
             <NavigateNextIcon />
           </IconButton>
@@ -204,144 +195,81 @@ const TimelineView = ({
         </Box>
       </TimelineHeader>
 
-      <Droppable droppableId={`timeline-${currentDay}`}>
-        {(provided) => (
-          <TimelineContent ref={provided.innerRef} {...provided.droppableProps}>
-            {dayActivities.map((activity, index) => (
-              <Draggable
-                key={activity.id}
-                draggableId={activity.id}
-                index={index}
-              >
-                {(provided) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    style={{
-                      width: '100%',
-                      ...provided.draggableProps.style
-                    }}
-                  >
-                    <Activity
-                      id={activity.id}
-                      title={activity.title}
-                      address={activity.address}
-                      price={activity.price}
-                      tags={activity.tags}
-                      rating={activity.rating}
-                      image={activity.image}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                    />
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </TimelineContent>
-        )}
-      </Droppable>
+      <TimelineContent>
+        <Droppable droppableId={`timeline-${currentDay}`}>
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              style={{ flex: 1, minHeight: 100 }}
+            >
+              {dayActivities.map((activity, index) => (
+                <Draggable
+                  key={String(activity.id)}
+                  draggableId={String(activity.id)}
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        opacity: snapshot.isDragging ? 0.8 : 1,
+                      }}
+                    >
+                      <Activity
+                        id={activity.id}
+                        title={activity.title}
+                        address={activity.address}
+                        price={activity.price}
+                        tags={activity.tags || []}
+                        rating={activity.rating}
+                        image={activity.image_url}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </TimelineContent>
 
-      <Dialog
-        open={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        PaperProps={{
-          sx: {
-            backgroundColor: '#2c3446',
-            color: 'white'
-          }
-        }}
-      >
-        <DialogTitle>Remove {currentDayTitle}?</DialogTitle>
+      <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
+        <DialogTitle>Remove Day</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to remove {currentDayTitle}? This action cannot be undone.
+            Are you sure you want to remove this day? All activities will be moved back to the backlog.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setShowDeleteDialog(false)}
-            sx={{ color: 'white' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={confirmRemoveDay}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#ff4444',
-              '&:hover': {
-                backgroundColor: '#cc0000'
-              }
-            }}
-          >
+          <Button onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={confirmRemoveDay} color="error">
             Remove
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog
-        open={showEditTitleDialog}
-        onClose={() => setShowEditTitleDialog(false)}
-        PaperProps={{
-          sx: {
-            backgroundColor: '#2c3446',
-            color: 'white'
-          }
-        }}
-      >
+      <Dialog open={showEditTitleDialog} onClose={() => setShowEditTitleDialog(false)}>
         <DialogTitle>Edit Day Title</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             label="Day Title"
-            type="text"
             fullWidth
-            variant="outlined"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            sx={{
-              mt: 2,
-              '& .MuiOutlinedInput-root': {
-                color: 'white',
-                '& fieldset': {
-                  borderColor: '#666',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#4CAF50',
-                },
-                '&.Mui-focused fieldset': {
-                  borderColor: '#4CAF50',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#999',
-              },
-              '& .MuiInputLabel-root.Mui-focused': {
-                color: '#4CAF50',
-              },
-            }}
           />
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setShowEditTitleDialog(false)}
-            sx={{ color: 'white' }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSaveTitle}
-            variant="contained"
-            sx={{ 
-              backgroundColor: '#4CAF50',
-              '&:hover': {
-                backgroundColor: '#45a049'
-              }
-            }}
-          >
+          <Button onClick={() => setShowEditTitleDialog(false)}>Cancel</Button>
+          <Button onClick={handleSaveTitle} color="primary">
             Save
           </Button>
         </DialogActions>

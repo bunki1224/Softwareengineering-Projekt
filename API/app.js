@@ -7,9 +7,9 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = 3000;
 
-// Enable CORS for all routes with more permissive settings for development
+// Enable CORS with specific configuration
 app.use(cors({
-  origin: '*', // Allow all origins in development
+  origin: 'http://localhost:5173', // Your frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -430,7 +430,7 @@ app.delete('/trips/:tripId', async (req, res) => {
 // Login endpoint
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  console.log('Login attempt for username:', username);
+  console.log('Login attempt for:', { username });
 
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required' });
@@ -439,47 +439,34 @@ app.post('/login', async (req, res) => {
   let conn;
   try {
     conn = await pool.getConnection();
-    
-    // Get user with password hash
+
+    // Get user from database
     const rows = await conn.query(
-      'SELECT id, username, email, password_hash FROM users WHERE username = ?',
+      "SELECT * FROM users WHERE username = ?",
       [username]
     );
 
-    console.log('Found users:', rows ? rows.length : 0);
-
     if (!rows || rows.length === 0) {
-      console.log('No user found with username:', username);
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     const user = rows[0];
-    console.log('Found user:', { id: user.id, username: user.username });
 
     // Compare password
     const match = await bcrypt.compare(password, user.password_hash);
-    console.log('Password match:', match);
-
     if (!match) {
-      console.log('Password does not match for user:', username);
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
-    // Password matches, send user data (excluding password)
-    const userData = {
+    // Return user data (excluding password)
+    res.json({
       id: user.id.toString(),
       username: user.username,
       email: user.email
-    };
-
-    console.log('Login successful for user:', userData);
-    res.json(userData);
+    });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ 
-      error: 'Login failed',
-      details: err.message 
-    });
+    res.status(500).json({ error: 'Failed to login' });
   } finally {
     if (conn) conn.release();
   }

@@ -15,7 +15,6 @@ const Login = () => {
     setLoading(true);
     
     try {
-      console.log('Attempting login with:', { username });
       const response = await fetch('http://localhost:3000/login', {
         method: 'POST',
         headers: {
@@ -25,9 +24,7 @@ const Login = () => {
         credentials: 'include'
       });
 
-      console.log('Response status:', response.status);
       const data = await response.json();
-      console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Login failed');
@@ -38,7 +35,6 @@ const Login = () => {
       localStorage.setItem('username', data.username);
       localStorage.setItem('email', data.email);
       
-      console.log('Login successful, redirecting...');
       // Redirect to trips page
       navigate('/trips');
     } catch (error) {

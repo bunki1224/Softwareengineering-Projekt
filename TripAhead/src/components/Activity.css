@@ -1,0 +1,71 @@
+.activity-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.activity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.activity-card.selected {
+  border: 2px solid #213243;
+}
+
+.activity-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.activity-info {
+  padding: 8px;
+}
+
+.activity-info h3 {
+  margin: 0 0 8px 0;
+  color: #213243;
+  font-size: 1.2rem;
+}
+
+.activity-address {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.activity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.activity-type {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.activity-price {
+  background: #f5f5f5;
+  color: #666;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.activity-rating {
+  color: #ffc107;
+  font-size: 0.9rem;
+  margin-top: 8px;
+} 

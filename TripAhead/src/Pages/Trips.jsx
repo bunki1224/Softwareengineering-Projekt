@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DragDropContext } from 'react-beautiful-dnd';
-import TimelineView from '../components/TimelineView';
 import '../styles/Trips.css';
 
 const Trips = () => {
@@ -15,9 +13,6 @@ const Trips = () => {
     start_date: '',
     end_date: ''
   });
-  const [currentDay, setCurrentDay] = useState(0);
-  const [maxDays, setMaxDays] = useState(7);
-  const [dayTitles, setDayTitles] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,27 +87,6 @@ const Trips = () => {
     navigate(`/trip/${tripId}`);
   };
 
-  const handleAddDay = () => {
-    if (maxDays < 14) {
-      setMaxDays(prev => prev + 1);
-      setCurrentDay(maxDays);
-    }
-  };
-
-  const handleRemoveDay = (dayToRemove) => {
-    setMaxDays(prev => prev - 1);
-    if (currentDay === dayToRemove) {
-      setCurrentDay(prev => prev - 1);
-    }
-  };
-
-  const handleUpdateDayTitle = (day, title) => {
-    setDayTitles(prev => ({
-      ...prev,
-      [day]: title
-    }));
-  };
-
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -181,20 +155,26 @@ const Trips = () => {
         </div>
       )}
 
-      <DragDropContext onDragEnd={() => {}}>
-        <div className="trips-timeline">
-          <TimelineView
-            activities={trips}
-            currentDay={currentDay}
-            onDayChange={setCurrentDay}
-            maxDays={maxDays}
-            onAddDay={handleAddDay}
-            onRemoveDay={handleRemoveDay}
-            dayTitles={dayTitles}
-            onUpdateDayTitle={handleUpdateDayTitle}
-          />
-        </div>
-      </DragDropContext>
+      <div className="trips-list">
+        {trips.length === 0 ? (
+          <p className="no-trips">No trips yet. Create your first trip!</p>
+        ) : (
+          trips.map((trip) => (
+            <div 
+              key={trip.id} 
+              className="trip-card"
+              onClick={() => handleTripClick(trip.id)}
+            >
+              <h3>{trip.title}</h3>
+              <p>{trip.description}</p>
+              <div className="trip-dates">
+                <span>Start: {new Date(trip.start_date).toLocaleDateString()}</span>
+                <span>End: {new Date(trip.end_date).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

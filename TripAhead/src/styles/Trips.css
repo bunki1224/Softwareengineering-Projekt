@@ -2,9 +2,7 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  height: calc(100vh - 64px);
-  display: flex;
-  flex-direction: column;
+  min-height: calc(100vh - 64px);
 }
 
 .create-trip-btn {
@@ -77,12 +75,51 @@
   color: white;
 }
 
-.trips-timeline {
-  flex: 1;
-  background: #213243;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+.trips-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.trip-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.trip-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.trip-card h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.trip-card p {
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+
+.trip-dates {
+  display: flex;
+  justify-content: space-between;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.no-trips {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #666;
+  font-size: 1.2rem;
+  padding: 2rem;
 }
 
 .loading {

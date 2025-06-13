@@ -2,6 +2,9 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
 }
 
 .create-trip-btn {
@@ -74,41 +77,12 @@
   color: white;
 }
 
-.trips-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.trip-card {
-  background-color: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s ease-in-out;
-}
-
-.trip-card:hover {
-  transform: translateY(-4px);
-}
-
-.trip-card h3 {
-  margin: 0 0 1rem 0;
-  color: #333;
-}
-
-.trip-card p {
-  color: #666;
-  margin-bottom: 1rem;
-}
-
-.trip-dates {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #888;
+.trips-timeline {
+  flex: 1;
+  background: #213243;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
 }
 
 .loading {
@@ -121,12 +95,22 @@
 }
 
 .error-message {
-  background-color: #ffebee;
-  color: #c62828;
-  padding: 1rem;
-  border-radius: 4px;
+  color: #f44336;
   margin-bottom: 1rem;
-  border: 1px solid #ef9a9a;
+  padding: 1rem;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 button:disabled {

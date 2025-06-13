@@ -1,39 +1,31 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import HomeIcon from '@mui/icons-material/Home';
-import ListIcon from '@mui/icons-material/List';
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 import CardTravelIcon from '@mui/icons-material/CardTravel';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate, useLocation } from 'react-router-dom';
 
-const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#2c3446',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-}));
+const StyledAppBar = styled(AppBar)({
+  backgroundColor: '#213243',
+});
 
-const NavButton = styled(Button)(({ theme, active }) => ({
-  color: active ? '#4CAF50' : '#ffffff',
-  margin: '0 8px',
-  padding: '8px 16px',
-  borderRadius: '8px',
-  '&:hover': {
-    backgroundColor: active ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-  },
-  '& .MuiButton-startIcon': {
-    color: active ? '#4CAF50' : '#ffffff',
-  },
-}));
-
-const Logo = styled(Typography)(({ theme }) => ({
-  color: '#ffffff',
-  fontWeight: 'bold',
-  fontSize: '1.5rem',
-  marginRight: '32px',
+const Logo = styled(Typography)({
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
+  color: 'white',
+  fontSize: '1.5rem',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+});
+
+const NavButton = styled(Button)(({ theme, active }) => ({
+  color: 'white',
+  backgroundColor: active ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
 }));
 
 function Navbar() {
@@ -42,7 +34,7 @@ function Navbar() {
   const username = localStorage.getItem('username');
 
   const handleHomeClick = () => {
-    navigate('/');
+    navigate('/trips');
   };
 
   const handleLogout = () => {
@@ -58,39 +50,16 @@ function Navbar() {
   return (
     <StyledAppBar position="static">
       <Toolbar>
-        <Logo>
-          <TimelineIcon /> TripAhead
+        <Logo onClick={handleHomeClick}>
+          <FlightTakeoffIcon /> TripAhead
         </Logo>
         <Box sx={{ flexGrow: 1, display: 'flex', gap: 1 }}>
-          <NavButton
-            startIcon={<HomeIcon />}
-            onClick={handleHomeClick}
-            active={isActive('/')}
-          >
-            Home
-          </NavButton>
           <NavButton
             startIcon={<CardTravelIcon />}
             onClick={() => navigate('/trips')}
             active={isActive('/trips')}
           >
             My Trips
-          </NavButton>
-          {location.pathname.includes('/trip/') && (
-            <NavButton
-              startIcon={<ListIcon />}
-              onClick={() => navigate(`${location.pathname}/backlog`)}
-              active={location.pathname.includes('/backlog')}
-            >
-              Backlog
-            </NavButton>
-          )}
-          <NavButton
-            startIcon={<TimelineIcon />}
-            onClick={() => navigate('/timeline')}
-            active={isActive('/timeline')}
-          >
-            Timeline
           </NavButton>
         </Box>
         {username && (

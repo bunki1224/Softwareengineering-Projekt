@@ -522,6 +522,30 @@ const Backlog = () => {
     }
   };
 
+  const handleMoveToBacklog = async (activityId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/activities/${activityId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'backlog',
+          day: null
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to move activity to backlog');
+      }
+
+      await fetchActivities();
+    } catch (error) {
+      console.error('Error moving activity to backlog:', error);
+      setError('Failed to move activity to backlog');
+    }
+  };
+
   if (loading) {
     return (
       <div className="backlog-container">
@@ -607,7 +631,9 @@ const Backlog = () => {
                               onEdit={handleEditActivity}
                               onDelete={handleDeleteActivity}
                               onMoveToDay={handleMoveToDay}
+                              onMoveToBacklog={handleMoveToBacklog}
                               totalDays={totalDays}
+                              status={activity.status}
                             />
                           </div>
                         )}
@@ -686,6 +712,10 @@ const Backlog = () => {
                                 image={activity.image_url}
                                 onEdit={handleEditActivity}
                                 onDelete={handleDeleteActivity}
+                                onMoveToDay={handleMoveToDay}
+                                onMoveToBacklog={handleMoveToBacklog}
+                                totalDays={totalDays}
+                                status={activity.status}
                               />
                             </div>
                           )}

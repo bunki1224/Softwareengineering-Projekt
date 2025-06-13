@@ -4,6 +4,9 @@ import { border, borderRadius, color, styled } from '@mui/system';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import CustomTextField from "./CustomTextField";
 
@@ -78,7 +81,7 @@ const textFieldStyle = {
   },
 };
 
-const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete, onMoveToDay, totalDays }) => {
+const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDelete, onMoveToDay, totalDays, status, onMoveToBacklog }) => {
   const [activityData, setActivityData] = useState({ id, title, address, price, tags, rating, image });
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -151,7 +154,7 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
 
           <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
             <IconButton onClick={handleMoveClick} size="small" sx={{ color: '#213243' }}>
-              <MoveToInboxIcon />
+              <MoreVertIcon />
             </IconButton>
             <IconButton onClick={handleOpen} size="small" sx={{ color: '#213243' }}>
               <EditIcon />
@@ -166,11 +169,20 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
             open={Boolean(anchorEl)}
             onClose={handleMoveClose}
           >
-            {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => (
-              <MenuItem key={day} onClick={() => handleMoveToDay(day)}>
-                Move to Day {day}
+            {status === 'timeline' && (
+              <MenuItem onClick={() => onMoveToBacklog(id)}>
+                <ArrowUpwardIcon sx={{ mr: 1 }} /> Move to Backlog
               </MenuItem>
-            ))}
+            )}
+            {status === 'backlog' && totalDays > 0 && (
+              <>
+                {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => (
+                  <MenuItem key={day} onClick={() => handleMoveToDay(day)}>
+                    <ArrowDownwardIcon sx={{ mr: 1 }} /> Move to Day {day}
+                  </MenuItem>
+                ))}
+              </>
+            )}
           </Menu>
 
           <Modal

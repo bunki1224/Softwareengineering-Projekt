@@ -38,7 +38,9 @@ const DayTitle = styled(Box)(({ theme }) => ({
 const mapContainerStyle = {
   width: '100%',
   height: '100%',
-  minHeight: '400px'
+  position: 'absolute',
+  top: 0,
+  left: 0
 };
 
 const defaultCenter = {
@@ -51,11 +53,32 @@ const mapOptions = {
     {
       featureType: "all",
       elementType: "all",
+      stylers: [{ visibility: "on" }]
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
       stylers: [{ color: "#2c3446" }]
+    },
+    {
+      featureType: "landscape",
+      elementType: "geometry",
+      stylers: [{ color: "#213243" }]
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#424b64" }]
+    },
+    {
+      featureType: "poi",
+      elementType: "geometry",
+      stylers: [{ color: "#424b64" }]
     }
   ],
   disableDefaultUI: true,
-  zoomControl: true
+  zoomControl: true,
+  backgroundColor: 'transparent'
 };
 
 function Homepage() {

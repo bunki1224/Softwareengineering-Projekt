@@ -48,6 +48,7 @@
     flex-direction: column;
     gap: 24px;
     background: #213243;
+    min-height: 0;
   }
   
   .topPanel {

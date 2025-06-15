@@ -568,9 +568,19 @@ app.get('/trips/:tripId/activities', async (req, res) => {
 // Add activity to trip
 app.post('/trips/:tripId/activities', async (req, res) => {
   const tripId = req.params.tripId;
-  const { title, description, address, price, tags, status = 'backlog' } = req.body;
+  const { title, description, address, price, tags, status = 'backlog', position_lat, position_lng } = req.body;
 
-  console.log('Adding activity to trip:', { tripId, title, description, address, price, tags, status });
+  console.log('Adding activity to trip:', { 
+    tripId, 
+    title, 
+    description, 
+    address, 
+    price, 
+    tags, 
+    status,
+    position_lat,
+    position_lng 
+  });
 
   try {
     // Validate required fields
@@ -583,14 +593,16 @@ app.post('/trips/:tripId/activities', async (req, res) => {
 
     // First create the activity
     const activityResult = await pool.query(
-      `INSERT INTO activities (title, description, address, price, tags) 
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO activities (title, description, address, price, tags, position_lat, position_lng) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         description,
         address,
         price || null,
-        JSON.stringify(Array.isArray(tags) ? tags : [tags].filter(Boolean))
+        JSON.stringify(Array.isArray(tags) ? tags : [tags].filter(Boolean)),
+        position_lat || null,
+        position_lng || null
       ]
     );
     

@@ -1,18 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreateTripModal from '../components/CreateTripModal';
 import '../styles/Trips.css';
 
 const Trips = () => {
   const [trips, setTrips] = useState([]);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [newTrip, setNewTrip] = useState({
-    title: '',
-    description: '',
-    start_date: '',
-    end_date: ''
-  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,8 +36,7 @@ const Trips = () => {
     }
   };
 
-  const handleCreateTrip = async (e) => {
-    e.preventDefault();
+  const handleCreateTrip = async (tripData) => {
     try {
       setLoading(true);
       setError(null);
@@ -57,7 +51,7 @@ const Trips = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...newTrip,
+          ...tripData,
           user_id: userId
         }),
       });
@@ -67,13 +61,7 @@ const Trips = () => {
         throw new Error(errorData.error || 'Failed to create trip');
       }
 
-      setShowCreateForm(false);
-      setNewTrip({
-        title: '',
-        description: '',
-        start_date: '',
-        end_date: ''
-      });
+      setShowCreateModal(false);
       await fetchTrips();
     } catch (error) {
       console.error('Error creating trip:', error);
@@ -87,7 +75,7 @@ const Trips = () => {
     navigate(`/trip/${tripId}`);
   };
 
-  if (loading) {
+  if (loading && trips.length === 0) {
     return <div className="loading">Loading...</div>;
   }
 
@@ -103,57 +91,18 @@ const Trips = () => {
       
       <button 
         className="create-trip-btn"
-        onClick={() => setShowCreateForm(true)}
+        onClick={() => setShowCreateModal(true)}
         disabled={loading}
       >
         Create New Trip
       </button>
 
-      {showCreateForm && (
-        <div className="create-trip-form">
-          <h2>Create New Trip</h2>
-          <form onSubmit={handleCreateTrip}>
-            <input
-              type="text"
-              placeholder="Trip Title"
-              value={newTrip.title}
-              onChange={(e) => setNewTrip({...newTrip, title: e.target.value})}
-              required
-              disabled={loading}
-            />
-            <textarea
-              placeholder="Description"
-              value={newTrip.description}
-              onChange={(e) => setNewTrip({...newTrip, description: e.target.value})}
-              disabled={loading}
-            />
-            <input
-              type="date"
-              value={newTrip.start_date}
-              onChange={(e) => setNewTrip({...newTrip, start_date: e.target.value})}
-              disabled={loading}
-            />
-            <input
-              type="date"
-              value={newTrip.end_date}
-              onChange={(e) => setNewTrip({...newTrip, end_date: e.target.value})}
-              disabled={loading}
-            />
-            <div className="form-buttons">
-              <button type="submit" disabled={loading}>
-                {loading ? 'Creating...' : 'Create'}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => setShowCreateForm(false)}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      <CreateTripModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateTrip}
+        loading={loading}
+      />
 
       <div className="trips-list">
         {trips.length === 0 ? (

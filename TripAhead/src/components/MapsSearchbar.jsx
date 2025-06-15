@@ -44,6 +44,8 @@ const MapsSearchbar = ({ insertActivity }) => {
         tags: ["Sightseeing"], // Standard-Tag
         rating: Math.round(rating), // Standard-Bewertung
         image: "./bilder/default.jpg", // Beispielbild
+        position_lat: coordinates ? coordinates.lat : null,
+        position_lng: coordinates ? coordinates.lng : null
       };
 
       // Aufruf der Methode über die Props

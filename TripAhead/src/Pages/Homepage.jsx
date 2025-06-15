@@ -40,9 +40,11 @@ const mapContainerStyle = {
   height: '100%',
   position: 'absolute',
   top: 0,
-  left: 0
+  left: 0,
+  borderRadius: '18px'
 };
 
+// Default center for Tokyo (will be overridden if activities exist)
 const defaultCenter = {
   lat: 35.6762,
   lng: 139.6503
@@ -84,6 +86,7 @@ const mapOptions = {
 function Homepage() {
   const { id: tripId } = useParams();
   const [mapError, setMapError] = useState(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
   
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
@@ -97,6 +100,24 @@ function Homepage() {
   const [maxDays, setMaxDays] = useState(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Function to calculate the center point of all activities
+  const calculateMapCenter = (activities) => {
+    const allActivities = [...activities.timeline, ...activities.backlog];
+    const validActivities = allActivities.filter(a => a.position_lat && a.position_lng);
+    
+    if (validActivities.length === 0) {
+      return defaultCenter;
+    }
+
+    const sumLat = validActivities.reduce((sum, activity) => sum + parseFloat(activity.position_lat), 0);
+    const sumLng = validActivities.reduce((sum, activity) => sum + parseFloat(activity.position_lng), 0);
+    
+    return {
+      lat: sumLat / validActivities.length,
+      lng: sumLng / validActivities.length
+    };
+  };
 
   useEffect(() => {
     if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
@@ -112,6 +133,7 @@ function Homepage() {
         throw new Error('Failed to fetch activities');
       }
       const data = await response.json();
+      console.log('Raw activities data:', data);
       
       // Transform the data into the format expected by the component
       const transformedData = {
@@ -119,7 +141,31 @@ function Homepage() {
         timeline: data.filter(a => a.status === 'timeline')
       };
       
+      console.log('Transformed activities:', transformedData);
+      console.log('Timeline activities:', transformedData.timeline);
+      console.log('Backlog activities:', transformedData.backlog);
+      
+      // Log coordinates for each activity
+      transformedData.timeline.forEach(activity => {
+        console.log(`Timeline activity ${activity.id} coordinates:`, {
+          lat: activity.position_lat,
+          lng: activity.position_lng
+        });
+      });
+      
+      transformedData.backlog.forEach(activity => {
+        console.log(`Backlog activity ${activity.id} coordinates:`, {
+          lat: activity.position_lat,
+          lng: activity.position_lng
+        });
+      });
+      
       setActivities(transformedData);
+      
+      // Calculate and set the map center based on activities
+      const center = calculateMapCenter(transformedData);
+      console.log('Calculated map center:', center);
+      setMapCenter(center);
       
       // Calculate max days based on activities
       const maxDay = Math.max(...transformedData.timeline.map(a => a.day || 0), 0);
@@ -145,7 +191,7 @@ function Homepage() {
     }
   };
 
-  const dayActivities = activities.timeline.filter(activity => activity.day === currentDay);
+  const dayActivities = activities.timeline.filter(activity => activity.day === currentDay + 1);
   const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
 
   const handleMapLoad = (map) => {
@@ -161,6 +207,17 @@ function Homepage() {
   const handleMapError = (error) => {
     console.error('Map error:', error);
     setMapError('An error occurred while loading the map');
+  };
+
+  const getMarkerIcon = (status) => {
+    return {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: status === 'timeline' ? '#4CAF50' : '#FFA726',
+      fillOpacity: 1,
+      strokeWeight: 2,
+      strokeColor: '#ffffff',
+      scale: 8,
+    };
   };
 
   if (loading) {
@@ -278,7 +335,7 @@ function Homepage() {
               color: 'white',
               backgroundColor: '#2c3446'
             }}>
-              Error loading maps
+              Error loading maps: {loadError.message}
             </div>
           ) : !isLoaded ? (
             <div style={{ 
@@ -295,22 +352,57 @@ function Homepage() {
           ) : (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={selectedIdx ? activities.timeline.find(a => a.id === selectedIdx)?.position : defaultCenter}
+              center={selectedIdx ? 
+                {
+                  lat: parseFloat(activities.timeline.find(a => a.id === selectedIdx)?.position_lat) || mapCenter.lat,
+                  lng: parseFloat(activities.timeline.find(a => a.id === selectedIdx)?.position_lng) || mapCenter.lng
+                } : 
+                mapCenter
+              }
               zoom={12}
               options={mapOptions}
-              onLoad={handleMapLoad}
-              onError={handleMapError}
+              onLoad={(map) => {
+                console.log('Map loaded successfully');
+                handleMapLoad(map);
+              }}
+              onError={(error) => {
+                console.error('Map error:', error);
+                handleMapError(error);
+              }}
             >
-              {activities.timeline.map((activity) => (
-                <Marker
-                  key={activity.id}
-                  position={{ 
-                    lat: activity.position_lat || defaultCenter.lat, 
-                    lng: activity.position_lng || defaultCenter.lng 
-                  }}
-                  onClick={() => setSelectedIdx(activity.id)}
-                />
-              ))}
+              {console.log('Current activities state:', activities)}
+              {/* Timeline activities */}
+              {activities.timeline.map((activity) => {
+                const position = {
+                  lat: parseFloat(activity.position_lat) || mapCenter.lat,
+                  lng: parseFloat(activity.position_lng) || mapCenter.lng
+                };
+                console.log(`Rendering timeline activity ${activity.id} at position:`, position);
+                return (
+                  <Marker
+                    key={`timeline-${activity.id}`}
+                    position={position}
+                    onClick={() => setSelectedIdx(activity.id)}
+                    icon={getMarkerIcon('timeline')}
+                  />
+                );
+              })}
+              {/* Backlog activities */}
+              {activities.backlog.map((activity) => {
+                const position = {
+                  lat: parseFloat(activity.position_lat) || mapCenter.lat,
+                  lng: parseFloat(activity.position_lng) || mapCenter.lng
+                };
+                console.log(`Rendering backlog activity ${activity.id} at position:`, position);
+                return (
+                  <Marker
+                    key={`backlog-${activity.id}`}
+                    position={position}
+                    onClick={() => setSelectedIdx(activity.id)}
+                    icon={getMarkerIcon('backlog')}
+                  />
+                );
+              })}
             </GoogleMap>
           )}
         </div>

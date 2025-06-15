@@ -50,26 +50,33 @@ function App() {
     localStorage.setItem('dayTitles', JSON.stringify(dayTitles));
   }, [dayTitles]);
 
-  function insertActivity(item) {
-    
-    const activitiesbefore = activities;
-    const itemToAdd = item;
+  const insertActivity = async (activity) => {
+    try {
+      const response = await fetch(`http://localhost:3000/trips/${tripId}/activities`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...activity,
+          status: 'backlog',
+          trip_id: tripId,
+          position_lat: activity.position_lat,
+          position_lng: activity.position_lng
+        }),
+      });
 
-    //console.log("activities before: ", activitiesbefore);
-    //console.log("item to add: ", itemToAdd);
+      if (!response.ok) {
+        throw new Error('Failed to add activity');
+      }
 
-    const newActivities = {
-      ...activitiesbefore,
-      backlog: [itemToAdd, ...activitiesbefore.backlog],
-    };
-    
-    setActivities(newActivities);
+      await fetchActivities();
+    } catch (error) {
+      console.error('Error adding activity:', error);
+      setError('Failed to add activity');
+    }
+  };
 
-    //console.log("new activities: ", newActivities);
-
-  }
-  window.insertActivity = insertActivity;
-  
   function printActivites(){
     console.log(activities)
   }

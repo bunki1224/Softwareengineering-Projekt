@@ -32,6 +32,7 @@
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .search-input {
@@ -43,6 +44,7 @@
   background: #2c3446;
   color: white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  min-width: 300px;
 }
 
 .search-input::placeholder {

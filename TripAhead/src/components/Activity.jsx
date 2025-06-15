@@ -144,7 +144,7 @@ const Activity = ({ id, title, address, price, tags, rating, image, onEdit, onDe
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, flexWrap: 'wrap', gap: 1 }}>
-          <PriceBadge label={`${activityData.price} €`} />
+          <PriceBadge label={activityData.price === null ? "Free" : `${activityData.price} €`} />
 
           {Array.isArray(activityData.tags) && activityData.tags.map((tag) => (
             <TagChip key={tag} label={tag} />

@@ -608,6 +608,20 @@ const Backlog = () => {
               >
                 Add
               </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate(`/trip/${tripId}`)}
+                sx={{
+                  color: 'white',
+                  borderColor: 'white',
+                  '&:hover': {
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                  }
+                }}
+              >
+                Back to Trip
+              </Button>
             </div>
             <div className="backlog-list">
               <h2>Backlog</h2>

@@ -1,5 +1,5 @@
 import './Homepage.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLoadScript, GoogleMap, Marker } from '@react-google-maps/api';
 import { useParams } from 'react-router-dom';
 import { 
@@ -101,6 +101,20 @@ function Homepage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Add Marl marker to state
+  const [marlMarker] = useState({
+    position: { lat: 51.6557, lng: 7.0904 },
+    title: "Marl",
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeWeight: 2,
+      strokeColor: '#ffffff',
+      scale: 8,
+    }
+  });
+
   // Function to calculate the center point of all activities
   const calculateMapCenter = (activities) => {
     const allActivities = [...activities.timeline, ...activities.backlog];
@@ -194,9 +208,51 @@ function Homepage() {
   const dayActivities = activities.timeline.filter(activity => activity.day === currentDay + 1);
   const currentDayTitle = dayTitles[currentDay] || `Day ${currentDay + 1}`;
 
+  // Add state for map instance
+  const [mapInstance, setMapInstance] = useState(null);
+
+  // Function to update activity markers
+  const updateActivityMarkers = useCallback(() => {
+    if (!mapInstance) return;
+
+    // Clear existing activity markers
+    if (window.activityMarkers) {
+      window.activityMarkers.forEach(marker => marker.setMap(null));
+    }
+    window.activityMarkers = [];
+
+    // Add markers for current day's activities
+    dayActivities.forEach(activity => {
+      if (activity.position_lat && activity.position_lng) {
+        const marker = new google.maps.Marker({
+          position: {
+            lat: parseFloat(activity.position_lat),
+            lng: parseFloat(activity.position_lng)
+          },
+          map: mapInstance,
+          title: activity.title,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: '#FF0000',
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: '#ffffff',
+            scale: 8,
+          }
+        });
+        window.activityMarkers.push(marker);
+      }
+    });
+  }, [mapInstance, dayActivities]);
+
+  // Update markers when day changes or activities change
+  useEffect(() => {
+    updateActivityMarkers();
+  }, [currentDay, activities, updateActivityMarkers]);
+
   const handleMapLoad = (map) => {
     try {
-      // Add any map initialization logic here
+      setMapInstance(map);
       console.log('Map loaded successfully');
     } catch (error) {
       console.error('Error loading map:', error);
@@ -218,6 +274,15 @@ function Homepage() {
       strokeColor: '#ffffff',
       scale: 8,
     };
+  };
+
+  const marlMarkerIcon = {
+    path: google.maps.SymbolPath.CIRCLE,
+    fillColor: '#4285F4',
+    fillOpacity: 1,
+    strokeWeight: 2,
+    strokeColor: '#ffffff',
+    scale: 8,
   };
 
   if (loading) {
@@ -352,57 +417,13 @@ function Homepage() {
           ) : (
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={selectedIdx ? 
-                {
-                  lat: parseFloat(activities.timeline.find(a => a.id === selectedIdx)?.position_lat) || mapCenter.lat,
-                  lng: parseFloat(activities.timeline.find(a => a.id === selectedIdx)?.position_lng) || mapCenter.lng
-                } : 
-                mapCenter
-              }
+              center={{ lat: 51.6557, lng: 7.0904 }}
               zoom={12}
               options={mapOptions}
-              onLoad={(map) => {
-                console.log('Map loaded successfully');
-                handleMapLoad(map);
-              }}
-              onError={(error) => {
-                console.error('Map error:', error);
-                handleMapError(error);
-              }}
+              onLoad={handleMapLoad}
+              onError={handleMapError}
             >
-              {console.log('Current activities state:', activities)}
-              {/* Timeline activities */}
-              {activities.timeline.map((activity) => {
-                const position = {
-                  lat: parseFloat(activity.position_lat) || mapCenter.lat,
-                  lng: parseFloat(activity.position_lng) || mapCenter.lng
-                };
-                console.log(`Rendering timeline activity ${activity.id} at position:`, position);
-                return (
-                  <Marker
-                    key={`timeline-${activity.id}`}
-                    position={position}
-                    onClick={() => setSelectedIdx(activity.id)}
-                    icon={getMarkerIcon('timeline')}
-                  />
-                );
-              })}
-              {/* Backlog activities */}
-              {activities.backlog.map((activity) => {
-                const position = {
-                  lat: parseFloat(activity.position_lat) || mapCenter.lat,
-                  lng: parseFloat(activity.position_lng) || mapCenter.lng
-                };
-                console.log(`Rendering backlog activity ${activity.id} at position:`, position);
-                return (
-                  <Marker
-                    key={`backlog-${activity.id}`}
-                    position={position}
-                    onClick={() => setSelectedIdx(activity.id)}
-                    icon={getMarkerIcon('backlog')}
-                  />
-                );
-              })}
+              {/* Activity markers are now handled by updateActivityMarkers */}
             </GoogleMap>
           )}
         </div>

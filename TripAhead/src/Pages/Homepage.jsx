@@ -100,6 +100,7 @@ function Homepage() {
   const [maxDays, setMaxDays] = useState(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [tripData, setTripData] = useState(null);
 
   // Add Marl marker to state
   const [marlMarker] = useState({
@@ -137,8 +138,32 @@ function Homepage() {
     if (!import.meta.env.VITE_GOOGLE_MAPS_API_KEY) {
       setMapError('Google Maps API key is missing. Please add it to your .env file.');
     }
+    fetchTripData();
     fetchActivities();
   }, [tripId]);
+
+  const fetchTripData = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/trip/${tripId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch trip data');
+      }
+      const data = await response.json();
+      setTripData(data);
+    } catch (error) {
+      console.error('Error fetching trip data:', error);
+      setError('Failed to load trip data');
+    }
+  };
+
+  const calculateDaysUntilTrip = () => {
+    if (!tripData || !tripData.start_date) return 'N/A';
+    const startDate = new Date(tripData.start_date);
+    const today = new Date();
+    const diffTime = startDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? `${diffDays} Days` : 'Trip has started';
+  };
 
   const fetchActivities = async () => {
     try {
@@ -384,7 +409,7 @@ function Homepage() {
           </div>
           <div className="box">
             <h3>Time to trip</h3>
-            <p>180 Days</p>
+            <p>{calculateDaysUntilTrip()}</p>
           </div>
           <div className="box">
             <h3>Weather</h3>

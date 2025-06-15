@@ -16,6 +16,17 @@ const TripDashboard = () => {
         >
           Manage Activities
         </button>
+        <button 
+          className="backlog-button"
+          disabled
+          style={{
+            backgroundColor: '#666',
+            cursor: 'not-allowed',
+            marginLeft: '10px'
+          }}
+        >
+          Export Trip
+        </button>
       </div>
       <Homepage />
     </div>

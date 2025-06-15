@@ -88,21 +88,6 @@ const Trips = () => {
           {error}
         </div>
       )}
-      
-      <button 
-        className="create-trip-btn"
-        onClick={() => setShowCreateModal(true)}
-        disabled={loading}
-      >
-        Create New Trip
-      </button>
-
-      <CreateTripModal
-        open={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSubmit={handleCreateTrip}
-        loading={loading}
-      />
 
       <div className="trips-list">
         {trips.length === 0 ? (
@@ -124,6 +109,21 @@ const Trips = () => {
           ))
         )}
       </div>
+
+      <button 
+        className="create-trip-btn"
+        onClick={() => setShowCreateModal(true)}
+        disabled={loading}
+      >
+        Create New Trip
+      </button>
+
+      <CreateTripModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateTrip}
+        loading={loading}
+      />
     </div>
   );
 };

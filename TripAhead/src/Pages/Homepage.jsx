@@ -221,28 +221,44 @@ function Homepage() {
     }
     window.activityMarkers = [];
 
+    // Create bounds object
+    const bounds = new google.maps.LatLngBounds();
+
     // Add markers for current day's activities
     dayActivities.forEach(activity => {
       if (activity.position_lat && activity.position_lng) {
+        const position = {
+          lat: parseFloat(activity.position_lat),
+          lng: parseFloat(activity.position_lng)
+        };
+        
         const marker = new google.maps.Marker({
-          position: {
-            lat: parseFloat(activity.position_lat),
-            lng: parseFloat(activity.position_lng)
-          },
+          position: position,
           map: mapInstance,
           title: activity.title,
           icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#FF0000',
-            fillOpacity: 1,
-            strokeWeight: 2,
-            strokeColor: '#ffffff',
-            scale: 8,
+            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+            scaledSize: new google.maps.Size(32, 32)
           }
         });
         window.activityMarkers.push(marker);
+        
+        // Extend bounds to include this marker
+        bounds.extend(position);
       }
     });
+
+    // If we have markers, fit the map to show all of them
+    if (window.activityMarkers.length > 0) {
+      mapInstance.fitBounds(bounds);
+      
+      // Add some padding to the bounds
+      const listener = google.maps.event.addListenerOnce(mapInstance, 'idle', () => {
+        if (mapInstance.getZoom() > 15) {
+          mapInstance.setZoom(15);
+        }
+      });
+    }
   }, [mapInstance, dayActivities]);
 
   // Update markers when day changes or activities change

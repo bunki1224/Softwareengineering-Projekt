@@ -3,6 +3,8 @@ const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./swagger');
 
 const app = express();
 const port = 3000;
@@ -25,6 +27,9 @@ app.use((err, req, res, next) => {
 
 app.use(express.json());
 
+// Swagger documentation route
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
 dotenv.config();
 
 // Pool erstellen
@@ -40,14 +45,54 @@ const pool = mariadb.createPool({
   queueLimit: 0
 });
 
-
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Root endpoint
+ *     description: Returns a simple message with the database name
+ *     responses:
+ *       200:
+ *         description: Success response
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 
 // Middleware + Routen definieren
 app.get('/', (req, res) => {
   res.status(200).json({ message:  process.env.DB_NAME});
-  
 });
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieve a list of all users
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *       500:
+ *         description: Server error
+ */
 
 // Get Requests for Users
 app.get('/users', async (req, res) => {
@@ -64,21 +109,37 @@ app.get('/users', async (req, res) => {
   }
 });
 
-// Get all activities
-app.get('/activities', async (req, res) => {
-  try {
-    const [activities] = await pool.query("SELECT * FROM activities");
-    // Ensure activities is an array and convert BigInt to Number
-    const formattedActivities = Array.isArray(activities) ? activities.map(activity => ({
-      ...activity,
-      id: Number(activity.id)
-    })) : [];
-    res.json(formattedActivities);
-  } catch (err) {
-    console.error('Error fetching activities:', err);
-    res.status(500).json({ error: 'Failed to fetch activities' });
-  }
-});
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new user
+ *     description: Register a new user with username, email, and password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Invalid input or user already exists
+ *       500:
+ *         description: Server error
+ */
 
 // Post new user
 app.post('/users', async (req, res) => {
@@ -140,6 +201,52 @@ app.post('/users', async (req, res) => {
     if (conn) conn.release();
   }
 });
+
+/**
+ * @swagger
+ * /activities:
+ *   post:
+ *     summary: Create a new activity
+ *     description: Add a new activity to the system
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - address
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               rating:
+ *                 type: number
+ *               image_url:
+ *                 type: string
+ *               position_lat:
+ *                 type: number
+ *               position_lng:
+ *                 type: number
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Activity created successfully
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Server error
+ */
 
 // Create new activity
 app.post('/activities', async (req, res) => {
@@ -212,6 +319,96 @@ app.post('/activities', async (req, res) => {
       error: 'Failed to create activity',
       details: err.message
     });
+  }
+});
+
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: User login
+ *     description: Authenticate a user with username and password
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *       401:
+ *         description: Invalid credentials
+ *       500:
+ *         description: Server error
+ */
+
+// Login endpoint
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  console.log('Login attempt for:', { username });
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  let conn;
+  try {
+    conn = await pool.getConnection();
+
+    // Get user from database
+    const rows = await conn.query(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+
+    if (!rows || rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    const user = rows[0];
+
+    // Compare password
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // Return user data (excluding password)
+    res.json({
+      id: user.id.toString(),
+      username: user.username,
+      email: user.email
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ error: 'Failed to login' });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
+// Get all activities
+app.get('/activities', async (req, res) => {
+  try {
+    const [activities] = await pool.query("SELECT * FROM activities");
+    // Ensure activities is an array and convert BigInt to Number
+    const formattedActivities = Array.isArray(activities) ? activities.map(activity => ({
+      ...activity,
+      id: Number(activity.id)
+    })) : [];
+    res.json(formattedActivities);
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+    res.status(500).json({ error: 'Failed to fetch activities' });
   }
 });
 
@@ -422,51 +619,6 @@ app.delete('/trips/:tripId', async (req, res) => {
     }
 
     res.json({ message: 'Trip gelöscht.' });
-  } finally {
-    if (conn) conn.release();
-  }
-});
-
-// Login endpoint
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  console.log('Login attempt for:', { username });
-
-  if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required' });
-  }
-
-  let conn;
-  try {
-    conn = await pool.getConnection();
-
-    // Get user from database
-    const rows = await conn.query(
-      "SELECT * FROM users WHERE username = ?",
-      [username]
-    );
-
-    if (!rows || rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    const user = rows[0];
-
-    // Compare password
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) {
-      return res.status(401).json({ error: 'Invalid username or password' });
-    }
-
-    // Return user data (excluding password)
-    res.json({
-      id: user.id.toString(),
-      username: user.username,
-      email: user.email
-    });
-  } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ error: 'Failed to login' });
   } finally {
     if (conn) conn.release();
   }
